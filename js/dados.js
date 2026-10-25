@@ -49,6 +49,7 @@ PV.i18n = (function(){
     ['PLANTÃO ENCERRADO', 'ON-CALL ENDED'], ['plantão iniciado', 'on-call started'], ['atenda os alertas antes do SLA', 'answer the alerts before the SLA'],
     ['resolvido em ', 'resolved in '], ['TOUR GUIADO', 'GUIDED TOUR'], ['toque ou aperte uma tecla para assumir o controle', 'tap or press a key to take control'],
     ['você assumiu o controle', 'you took control'], ['Tour concluído! Agora é com você: derrote o Bug Gigante', 'Tour complete! Now it is your turn: defeat the Giant Bug'],
+    ['fim da linha! Há salas secretas escondidas: procure os blocos ? e !', 'end of the line! Secret rooms are hidden: look for the ? and ! blocks'],
     ['sem pausa no speedrun', 'no pausing in speedrun'], ['sem terminal no speedrun', 'no terminal in speedrun']
   ].sort(function(a, b){ return b[0].length - a[0].length; });
 

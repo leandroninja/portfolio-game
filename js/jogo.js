@@ -689,6 +689,7 @@ function entrarBonus(sala){
   var f = null;
   M.fases.forEach(function(x){ if (x.bonus && x.el.id === id) f = x; });
   if (!f || !f.pouso) return;
+  f.el.classList.add('revelada');
   E.retorno = { x: p.x, y: p.y }; E.noBonus = true; E.bolas = [];
   if (!E.salas[id]) { E.salas[id] = true; E.pontos += 1000; }
   E.segredo = true; ganhar('segredo'); som.tocar('portal'); PV.contar('sala-' + id);
@@ -967,6 +968,7 @@ function acompanharFase(){
 }
 
 function tutorial(){
+  if (E.terminou && E.faseAtual === M.ultima && !E.noBonus && !(E.salas.bonus && E.salas.incidentes)) { dizer('fim da linha! Há salas secretas escondidas: procure os blocos ? e !', 9999); return; }
   if (E.speed || E.tour || E.faseMax > 0) return;
   if (!E.tut.andou) dizer('← → andam · espaço pula', 9999);
   else if (!E.tut.pulou2 && E.t < 12) dizer('espaço de novo no ar: pulo duplo', 9999);
@@ -1589,6 +1591,7 @@ function sair(){
   if (E && E.pisadoEl) E.pisadoEl.classList.remove('pisado');
   $$('.l.pisada').forEach(function(l){ l.classList.remove('pisada'); });
   $$('.fase-ativa').forEach(function(el){ el.classList.remove('fase-ativa'); });
+  $$('.bonus.revelada').forEach(function(el){ el.classList.remove('revelada'); });
   $$('.cartao.verde').forEach(function(el){ el.classList.remove('verde'); });
   rotulos();
 }

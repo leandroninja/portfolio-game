@@ -213,3 +213,6 @@ kbd{font-family:var(--f-pixel);font-size:11px;background:#10233a;border:1px soli
 .console em{display:block;margin-top:10px;font-style:normal;font-family:var(--f-display);font-size:22px;color:#ff4d7e;line-height:1.1}
 .console.saida{border-top-color:#34d399}.console.saida em{color:#34d399}
 .heroi-acoes{flex-wrap:wrap}
+
+/* salas secretas: no jogo só aparecem depois de descobertas (na leitura normal ficam visíveis) */
+.modo-jogo .bonus:not(.revelada){visibility:hidden}
