@@ -260,3 +260,4 @@ kbd{font-family:var(--f-pixel);font-size:11px;background:#10233a;border:1px soli
 #redes .no{border-top-color:#7864ff}#redes .no span{color:#c9b8ff}
 #seguranca .no.saida,#redes .no.saida{border-top-color:#34d399}
 #seguranca .no.saida span,#redes .no.saida span{color:#34d399}
+.grupo{flex-wrap:wrap}
