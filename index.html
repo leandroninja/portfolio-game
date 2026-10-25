@@ -281,6 +281,7 @@
     <a class="botao-linha" data-plat data-cv="en" href="curriculo/Leandro-Oliveira-Moraes-Resume-EN.pdf" download>📄 Résumé (PDF · EN)</a>
   </div>
   <p class="rodape" data-en="© 2026 Leandro Oliveira Moraes · hint: press ` to open a secret terminal">© 2026 Leandro Oliveira Moraes · dica: aperte ` para abrir um terminal secreto</p>
+  <div class="contador-rodape"></div>
 </section>
 
 <!-- ============ FASE 9 · SALA SECRETA (bônus) ============ -->
@@ -415,6 +416,14 @@
 </div>
 
 <script>(function(){var c=document.querySelector('meta[name="goatcounter"]').content;if(!c||location.protocol==="file:"||/^(localhost|127\.)/.test(location.hostname))return;var s=document.createElement("script");s.async=true;s.dataset.goatcounter="https://"+c+".goatcounter.com/count";s.src="https://gc.zgo.at/count.js";document.head.appendChild(s)})()</script>
+<script>(function(){
+  if(location.protocol==="file:"||/^(localhost|127\.)/.test(location.hostname))return;
+  var img=new Image();img.className="contador";img.alt="Visitantes";img.height=20;
+  img.src="https://visitor-badge.laobi.icu/badge?page_id=leandroninja.portfolio-game&left_color=%23050d1e&right_color=%2300b8d4&left_text=Visitantes";
+  function pos(){var m=document.querySelector(".marca"),r=document.querySelector(".contador-rodape");
+    if(innerWidth>=1500&&m){m.parentNode.classList.add("com-contador");m.insertAdjacentElement("afterend",img)}else if(r){r.appendChild(img)}}
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",pos);else pos();
+})()</script>
 <script src="js/som.js"></script>
 <script src="js/dados.js"></script>
 <script src="js/jogo.js"></script>

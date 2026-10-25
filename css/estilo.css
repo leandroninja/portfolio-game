@@ -238,3 +238,9 @@ kbd{font-family:var(--f-pixel);font-size:11px;background:#10233a;border:1px soli
 .no.patch-off{opacity:.14;border-style:dashed}
 .no.patch-aviso{animation:aviso .22s steps(2) infinite}
 @keyframes aviso{50%{opacity:.35}}
+
+/* contador de visitas (imagem) */
+.contador{height:20px;opacity:.85;vertical-align:middle}
+.nav.com-contador .marca{margin-right:14px}
+.nav .contador{margin-right:auto}
+.contador-rodape{margin-top:12px}
