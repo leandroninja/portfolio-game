@@ -66,6 +66,16 @@ PV.i18n = (function(){
     ['falha! orçamento restante: ', 'failure! budget left: '], ['sala final', 'final room'],
     ['você dominou as 5 clouds! pegue os selos e saia pelo portal', 'you mastered all 5 clouds! grab the seals and take the portal'],
     ['🔇 Mutar', '🔇 Mute'], ['🔊 Ativar som', '🔊 Sound on'],
+    ['CHEFE', 'BOSS'], ['derrote o chefe: ', 'defeat the boss: '], ['TITÃ DO TRÁFEGO', 'TRAFFIC TITAN'], ['ALUCINAÇÃO SUPREMA', 'SUPREME HALLUCINATION'],
+    ['HACKER SUPREMO', 'SUPREME HACKER'], ['BOTNET MESTRE', 'BOTNET MASTER'], ['INCIDENTE P0', 'P0 INCIDENT'],
+    ['SALA DE SEGURANÇA', 'SECURITY ROOM'], ['defenda o sistema', 'defend the system'], ['SALA DE REDES', 'NETWORK ROOM'], ['restaure a conexão', 'restore the connection'],
+    ['malwares invadem em ondas: proteja o núcleo do sistema', 'malware invades in waves: protect the system core'],
+    ['SISTEMA COMPROMETIDO', 'SYSTEM COMPROMISED'], ['reiniciando a defesa', 'restarting the defense'], ['SISTEMA PROTEGIDO', 'SYSTEM PROTECTED'],
+    ['hacker supremo derrotado', 'supreme hacker defeated'], ['SISTEMA', 'SYSTEM'], [' · malwares ', ' · malware '],
+    ['CONEXÃO RESTAURADA', 'CONNECTION RESTORED'], ['botnet mestre derrotado', 'botnet master defeated'], ['CONEXÃO ', 'CONNECTION '], [' · infecções ', ' · infections '],
+    ['conexão restaurada: ', 'connection restored: '], ['destrua as infecções da rede para restaurar a conexão', 'destroy the network infections to restore the connection'],
+    ['Bestiário: ', 'Bestiary: '], ['BESTIÁRIO', 'BESTIARY'],
+    ['malware invadindo', 'malware invading'],
     ['sem pausa no speedrun', 'no pausing in speedrun'], ['sem terminal no speedrun', 'no terminal in speedrun']
   ].sort(function(a, b){ return b[0].length - a[0].length; });
 
@@ -104,12 +114,16 @@ PV.conquistas = (function(){
     { id: 'terminal', pt: 'Hacker de terminal', en: 'Terminal hacker', dpt: 'Use o terminal secreto (tecla `).', den: 'Use the secret terminal (` key).' },
     { id: 'zerou', pt: 'Zerou o jogo', en: 'Beat the game', dpt: 'Chegue ao fim do jogo.', den: 'Reach the end of the game.' },
     { id: 'sem_morrer', pt: 'Zerou sem morrer', en: 'No-death run', dpt: 'Termine o jogo sem morrer nenhuma vez.', den: 'Finish the game without dying.' },
-    { id: 'azure', pt: 'Landing Zone no ar', en: 'Landing Zone is live', dpt: 'Monte a Landing Zone no mundo Azure.', den: 'Build the Landing Zone in the Azure world.' },
-    { id: 'aws', pt: 'Sobreviveu à Black Friday', en: 'Survived Black Friday', dpt: 'Vença as 3 ondas no mundo AWS.', den: 'Beat the 3 waves in the AWS world.' },
-    { id: 'gcp', pt: 'RAG entregue', en: 'RAG delivered', dpt: 'Entregue todos os trechos no mundo GCP.', den: 'Deliver every chunk in the GCP world.' },
-    { id: 'oracle', pt: 'Manutenção em dia', en: 'Maintenance on schedule', dpt: 'Colete os tablespaces no mundo Oracle.', den: 'Collect the tablespaces in the Oracle world.' },
-    { id: 'ibm', pt: 'SLO cumprido', en: 'SLO met', dpt: 'Chegue ao SLO dentro do orçamento de erros (IBM Cloud).', den: 'Reach the SLO within the error budget (IBM Cloud).' },
+    { id: 'azure', pt: 'Landing Zone no ar', en: 'Landing Zone is live', dpt: 'Monte a Landing Zone e derrote o Drift (mundo Azure).', den: 'Build the Landing Zone and defeat Drift (Azure world).' },
+    { id: 'aws', pt: 'Sobreviveu à Black Friday', en: 'Survived Black Friday', dpt: 'Vença as 3 ondas e o Titã do Tráfego (mundo AWS).', den: 'Beat the 3 waves and the Traffic Titan (AWS world).' },
+    { id: 'gcp', pt: 'RAG entregue', en: 'RAG delivered', dpt: 'Entregue os trechos e derrote a Alucinação Suprema (mundo GCP).', den: 'Deliver the chunks and defeat the Supreme Hallucination (GCP world).' },
+    { id: 'oracle', pt: 'Manutenção em dia', en: 'Maintenance on schedule', dpt: 'Colete os tablespaces e derrote o Patch Zero (mundo Oracle).', den: 'Collect the tablespaces and defeat Patch Zero (Oracle world).' },
+    { id: 'ibm', pt: 'SLO cumprido', en: 'SLO met', dpt: 'Chegue ao SLO no orçamento de erros e derrote o Incidente P0 (IBM Cloud).', den: 'Reach the SLO within the error budget and defeat the P0 Incident (IBM Cloud).' },
     { id: 'multicloud', pt: 'Mestre Multi-Cloud', en: 'Multi-Cloud master', dpt: 'Complete os 5 mundos das clouds.', den: 'Complete all 5 cloud worlds.' },
+    { id: 'seguranca', pt: 'Defensor do sistema', en: 'System defender', dpt: 'Derrote o Hacker Supremo na sala de segurança.', den: 'Defeat the Supreme Hacker in the security room.' },
+    { id: 'redes', pt: 'Rede restaurada', en: 'Network restored', dpt: 'Derrote o Botnet Mestre na sala de redes.', den: 'Defeat the Botnet Master in the network room.' },
+    { id: 'phishing', pt: 'Não caí no phishing', en: 'Did not fall for phishing', dpt: 'Derrote um phishing disfarçado.', den: 'Defeat a disguised phishing.' },
+    { id: 'bestiario', pt: 'Bestiário completo', en: 'Complete bestiary', dpt: 'Descubra todos os inimigos e chefes.', den: 'Discover every enemy and boss.' },
     { id: 'plantao', pt: 'Plantonista', en: 'On-call engineer', dpt: 'Termine o plantão na Central de Incidentes.', den: 'Finish the shift in the Incident Center.' },
     { id: 'incidentes', pt: 'Plantão perfeito', en: 'Perfect on-call', dpt: 'Resolva os 6 alertas dentro do SLA.', den: 'Resolve all 6 alerts within the SLA.' },
     { id: 'finops', pt: 'FinOps em ação', en: 'FinOps in action', dpt: 'Derrote a fatura de cloud.', den: 'Defeat the cloud bill.' },
@@ -151,7 +165,11 @@ PV.skins = (function(){
     { id: 'dourado', pt: 'Campeão dourado', en: 'Golden champion', req: 'sem_morrer', oculos: false,
       pal: { B: '#e0a84f', b: '#a8741f', L: '#fff0c4', J: '#5a3d12', D: '#2a2018' } },
     { id: 'multicloud', pt: 'Multi-Cloud', en: 'Multi-Cloud', req: 'multicloud', oculos: false,
-      pal: { B: '#0f62fe', b: '#0a3da8', L: '#ff9900', J: '#c74634', D: '#2a2018' } }
+      pal: { B: '#0f62fe', b: '#0a3da8', L: '#ff9900', J: '#c74634', D: '#2a2018' } },
+    { id: 'hacker', pt: 'Hacker (capuz verde)', en: 'Hacker (green hoodie)', req: 'seguranca', oculos: false,
+      pal: { B: '#0b1f12', b: '#05120a', L: '#00ff7f', J: '#0a0f0a', D: '#0b0b10' } },
+    { id: 'netadmin', pt: 'Admin de rede', en: 'Network admin', req: 'redes', oculos: true,
+      pal: { B: '#4b3fd6', b: '#2f2790', L: '#c9b8ff', J: '#1b1840', D: '#2a2018' } }
   ];
   var atual = 'padrao';
   try { atual = localStorage.getItem('pv-skin') || 'padrao'; } catch (e) {}
@@ -245,3 +263,46 @@ PV.tour = [
 PV.contar = function(nome){
   try { var g = window.goatcounter; if (g && g.count) g.count({ path: 'evento/' + nome, title: nome, event: true }); } catch (e) {}
 };
+
+/* ---------- bestiário: inimigos e chefes descobertos ---------- */
+PV.bestiario = (function(){
+  'use strict';
+  var LISTA = [
+    { id: 'bug', pt: 'Bug', en: 'Bug', dpt: 'Erro de código que patrulha as plataformas.', den: 'A code error patrolling the platforms.' },
+    { id: 'glitch', pt: 'Glitch', en: 'Glitch', dpt: 'Falha que flutua e pisca em roxo.', den: 'A glitch that floats and flickers in purple.' },
+    { id: 'crash', pt: 'Pod CrashLoop', en: 'Pod CrashLoop', dpt: 'Reinicia em loop e fica parado ao quebrar.', den: 'Restarts in a loop and freezes when it crashes.' },
+    { id: 'vaza', pt: 'Vazamento de segredo', en: 'Secret leak', dpt: 'Chave que pinga credenciais lá do alto.', den: 'A key dripping credentials from above.' },
+    { id: 'fatura', pt: 'Fatura de cloud', en: 'Cloud bill', dpt: 'Custo inesperado: aguenta 3 golpes.', den: 'An unexpected cost: takes 3 hits.' },
+    { id: 'phishing', pt: 'Phishing', en: 'Phishing', dpt: 'Disfarçado de bit; se revela quando você chega perto.', den: 'Disguised as a bit; reveals itself when you get close.' },
+    { id: 'miner', pt: 'Cryptominer', en: 'Cryptominer', dpt: 'Drena a sua energia (REIKI) quando está perto.', den: 'Drains your energy (REIKI) when nearby.' },
+    { id: 'ransom', pt: 'Ransomware', en: 'Ransomware', dpt: 'Sequestra o ambiente e atira cadeados. Aguenta 3 golpes.', den: 'Hijacks the environment and fires padlocks. Takes 3 hits.' },
+    { id: 'onda', pt: 'Tráfego', en: 'Traffic', dpt: 'Requisições da Black Friday, em ondas.', den: 'Black Friday requests, in waves.' },
+    { id: 'alucina', pt: 'Alucinação', en: 'Hallucination', dpt: 'Fantasma de IA que persegue e corrompe trechos.', den: 'An AI ghost that chases you and corrupts chunks.' },
+    { id: 'virus', pt: 'Vírus', en: 'Virus', dpt: 'Pequeno e veloz, corre direto para o núcleo.', den: 'Small and fast, rushes straight to the core.' },
+    { id: 'worm', pt: 'Worm', en: 'Worm', dpt: 'Quando morre, se divide em dois vírus.', den: 'When it dies, it splits into two viruses.' },
+    { id: 'infeccao', pt: 'Infecção de rede', en: 'Network infection', dpt: 'Nó infectado que atira dados maliciosos.', den: 'An infected node firing malicious data.' },
+    { id: 'boss_bug', pt: 'Bug Gigante', en: 'Giant Bug', dpt: 'Chefe da fase de Contato.', den: 'Boss of the Contact level.' },
+    { id: 'boss_azure', pt: 'Drift', en: 'Drift', dpt: 'Chefe do mundo Azure: dispara leques de erros.', den: 'Azure world boss: fires fans of errors.' },
+    { id: 'boss_aws', pt: 'Titã do Tráfego', en: 'Traffic Titan', dpt: 'Chefe do mundo AWS: mergulha sobre você.', den: 'AWS world boss: dives onto you.' },
+    { id: 'boss_gcp', pt: 'Alucinação Suprema', en: 'Supreme Hallucination', dpt: 'Chefe do mundo GCP: some e reaparece atirando orbes teleguiados.', den: 'GCP world boss: vanishes and reappears firing homing orbs.' },
+    { id: 'boss_oracle', pt: 'Patch Zero', en: 'Patch Zero', dpt: 'Chefe do mundo Oracle: derruba raios verticais.', den: 'Oracle world boss: drops vertical beams.' },
+    { id: 'boss_ibm', pt: 'Incidente P0', en: 'P0 Incident', dpt: 'Chefe do mundo IBM Cloud: dispara espirais de erros.', den: 'IBM Cloud world boss: fires spirals of errors.' },
+    { id: 'boss_seguranca', pt: 'Hacker Supremo', en: 'Supreme Hacker', dpt: 'Chefe da sala de segurança: some, atira e invoca malwares.', den: 'Security room boss: vanishes, shoots and summons malware.' },
+    { id: 'boss_redes', pt: 'Botnet Mestre', en: 'Botnet Master', dpt: 'Chefe da sala de redes: invoca pacotes e atira em leque.', den: 'Network room boss: summons packets and fires fans.' }
+  ];
+  var vistos = {};
+  try { vistos = JSON.parse(localStorage.getItem('pv-best') || '{}') || {}; } catch (e) { vistos = {}; }
+  return {
+    lista: LISTA,
+    viu: function(id){ return !!vistos[id]; },
+    achar: function(id){ for (var i = 0; i < LISTA.length; i++) if (LISTA[i].id === id) return LISTA[i]; return null; },
+    marcar: function(id){
+      if (vistos[id] || !this.achar(id)) return false;
+      vistos[id] = 1;
+      try { localStorage.setItem('pv-best', JSON.stringify(vistos)); } catch (e) {}
+      return true;
+    },
+    total: function(){ var n = 0; for (var k in vistos) if (vistos[k]) n++; return n; },
+    tudo: function(){ for (var i = 0; i < LISTA.length; i++) if (!vistos[LISTA[i].id]) return false; return true; }
+  };
+})();

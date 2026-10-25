@@ -230,7 +230,7 @@ M.faseDe = function(y){
   return 0;
 };
 
-var INIM = { bug: 1, glitch: 1, crash: 1, vaza: 1, fatura: 1, onda: 1, alucina: 1 };
+var INIM = { bug: 1, glitch: 1, crash: 1, vaza: 1, fatura: 1, onda: 1, alucina: 1, phishing: 1, miner: 1, ransom: 1, malware: 1, infeccao: 1 };
 
 M.criarEntidades = function(){
   var ents = [];
@@ -252,6 +252,7 @@ M.criarEntidades = function(){
   $$('[data-altar]').forEach(function(el){ ents.push({ tipo: 'altar', el: el, vivo: true }); });
   $$('[data-item]').forEach(function(el){ ents.push({ tipo: 'item', el: el, nome: el.dataset.item, sala: el.dataset.sala, vivo: true }); });
   $$('[data-meta]').forEach(function(el){ ents.push({ tipo: 'meta', el: el, vivo: true }); });
+  $$('[data-infeccao]').forEach(function(el){ ents.push({ tipo: 'infeccao', el: el, nome: el.dataset.infeccao, hp: 4, hpMax: 4, vivo: true, tiro: rnd(1, 2.5) }); });
   $$('[data-portal]').forEach(function(el){ ents.push({ tipo: 'portal', el: el, vivo: true }); });
   $$('[data-segredo]').forEach(function(el){ ents.push({ tipo: 'segredo', el: el, sala: el.dataset.segredo || 'badges', vivo: true }); });
   $$('[data-alerta]').forEach(function(el){ ents.push({ tipo: 'alerta', el: el, nome: el.dataset.alerta, nomeEn: el.dataset.alertaEn, sev: el.dataset.sev || 'P2', vivo: true, ativo: false }); });
@@ -268,6 +269,9 @@ M.criarEntidades = function(){
     if (m === 'crash') ents.push({ tipo: 'crash', el: el, u: .5, dir: 1, vivo: true, vel: 115, ciclo: rnd(0, 2), quebra: 0 });
     else if (m === 'fatura') ents.push({ tipo: 'fatura', el: el, u: .5, dir: -1, vivo: true, vel: 42, hp: 3, hpMax: 3 });
     else if (m === 'vaza') ents.push({ tipo: 'vaza', el: el, ph: rnd(0, 6), vivo: true, gota: rnd(1, 2.5) });
+    else if (m === 'phishing') ents.push({ tipo: 'phishing', el: el, u: .5, dir: 1, vivo: true, vel: 140, revelado: false });
+    else if (m === 'miner') ents.push({ tipo: 'miner', el: el, u: .5, dir: -1, vivo: true, vel: 28, hp: 2, hpMax: 2 });
+    else if (m === 'ransom') ents.push({ tipo: 'ransom', el: el, u: .5, dir: 1, vivo: true, vel: 34, hp: 3, hpMax: 3, tiro: rnd(1, 3) });
   });
   M.pisos.forEach(function(pi, i){
     if (pi.final) return;
@@ -287,6 +291,10 @@ M.posicionar = function(ents){
     if (e.tipo === 'crash') { e.w = 11 * M.esc; e.h = 11 * M.esc; }
     if (e.tipo === 'vaza') { e.w = 10 * M.esc; e.h = 12 * M.esc; }
     if (e.tipo === 'fatura') { e.w = 13 * M.esc; e.h = 16 * M.esc; }
+    if (e.tipo === 'phishing') { e.w = 9 * M.esc; e.h = 9 * M.esc; }
+    if (e.tipo === 'miner') { e.w = 13 * M.esc; e.h = 12 * M.esc; }
+    if (e.tipo === 'ransom') { e.w = 12 * M.esc; e.h = 12 * M.esc; }
+    if (e.tipo === 'infeccao') { e.w = 14 * M.esc; e.h = 14 * M.esc; }
     if (e.piso !== undefined) {
       var pi = M.pisos[e.piso];
       if (!pi || pi.final) { e.oculto = true; return; }
@@ -313,6 +321,7 @@ M.posicionar = function(ents){
       case 'ec2':    e.x = pl.x + pl.w * 0.5;  e.y = pl.y - 40 * k; break;
       case 'altar':  e.x = pl.x + pl.w * 0.5;  e.y = pl.y - 50 * k; break;
       case 'meta':   e.x = pl.x + pl.w * 0.5;  e.y = pl.y - 64 * k; break;
+      case 'infeccao': e.x = pl.x + (pl.w - e.w) / 2; e.y = pl.y - e.h; break;
       case 'segredo': e.x = pl.x + pl.w * 0.5; e.y = pl.y - 175 * k; break;
       case 'glitch': case 'vaza': e.cx = pl.x + pl.w * 0.5; e.cy = pl.y - 125 * k; e.ax = Math.min(pl.w * 0.42, 220 * k); break;
     }
@@ -336,7 +345,7 @@ function novoEstado(){
     ents: [], parts: [], textos: [], aneis: [], tiros: [], bolas: [], toasts: [], reiki: 100, boss: null,
     t: 0, crono: 0, cronoOn: false, pontos: 0, bits: 0, bitsTotal: 0,
     skills: [], skillsTotal: 0, trofeus: [], trofeusTotal: 0, bugs: 0, mortes: 0,
-    sala: null, nuvens: {}, finalEm: 0, finalSelos: 0,
+    sala: null, nuvens: {}, finalEm: 0, finalSelos: 0, rb: null, raios: [],
     inc: { on: false, feito: false, idx: 0, t: 0, resolvidos: 0, estourados: 0, soma: 0, lista: [] }, tour: null, salas: {},
     etapas: 0, etapasTotal: 0, badges: 0, badgesTotal: 0, escudo: 0, flash: 0,
     segredo: false, segredoPts: false, noBonus: false, retorno: null, salvou: false, speed: false,
@@ -703,18 +712,21 @@ function teleportar(x, y){
 var SEG_COR = {
   badges: ['224,168,79', '#e0a84f', '#7a4f1a', '?'], incidentes: ['255,77,126', '#ff4d7e', '#7a1830', '!'],
   azure: ['0,120,212', '#0078d4', '#02305c', 'A'], aws: ['255,153,0', '#ff9900', '#7a4a00', 'W'],
-  gcp: ['66,133,244', '#4285f4', '#17356b', 'G'], oracle: ['199,70,52', '#c74634', '#5c1a12', 'O'], ibm: ['15,98,254', '#0f62fe', '#06307a', 'I']
+  gcp: ['66,133,244', '#4285f4', '#17356b', 'G'], oracle: ['199,70,52', '#c74634', '#5c1a12', 'O'], ibm: ['15,98,254', '#0f62fe', '#06307a', 'I'],
+  seguranca: ['0,200,120', '#00c878', '#04402a', 'S'], redes: ['120,100,255', '#7864ff', '#2a2370', 'R']
 };
 var SALAS_INFO = {
   bonus: ['SALA SECRETA', 'SALA DE SERVIDORES', '#9b5cff'], incidentes: ['CENTRAL DE INCIDENTES', 'plantão iniciado', '#ff4d7e'],
   azure: ['MUNDO AZURE', 'monte a Landing Zone', '#0078d4'], aws: ['MUNDO AWS', 'Black Friday', '#ff9900'],
   gcp: ['MUNDO GCP', 'pipeline RAG', '#4285f4'], oracle: ['MUNDO ORACLE', 'janela de manutenção', '#c74634'],
-  ibm: ['MUNDO IBM CLOUD', 'orçamento de erros', '#0f62fe'], final: ['MESTRE MULTI-CLOUD', 'sala final', '#e0a84f']
+  ibm: ['MUNDO IBM CLOUD', 'orçamento de erros', '#0f62fe'], final: ['MESTRE MULTI-CLOUD', 'sala final', '#e0a84f'],
+  seguranca: ['SALA DE SEGURANÇA', 'defenda o sistema', '#00c878'], redes: ['SALA DE REDES', 'restaure a conexão', '#7864ff']
 };
 var CONCL = {
   azure: ['LANDING ZONE PRONTA', 'todas as peças no lugar'], aws: ['BLACK FRIDAY VENCIDA', 'todas as ondas'],
   gcp: ['RAG COMPLETO', 'todos os trechos entregues'], oracle: ['MANUTENÇÃO CONCLUÍDA', 'tablespaces coletados'],
-  ibm: ['SLO CUMPRIDO', 'dentro do orçamento de erros']
+  ibm: ['SLO CUMPRIDO', 'dentro do orçamento de erros'],
+  seguranca: ['SISTEMA PROTEGIDO', 'hacker supremo derrotado'], redes: ['CONEXÃO RESTAURADA', 'botnet mestre derrotado']
 };
 var SALAS = {};
 function entsDa(secao, tipo){ return E.ents.filter(function(e){ return e.secao === secao && e.tipo === tipo; }); }
@@ -728,7 +740,8 @@ function concluirSala(id){
   banner(CONCL[id][0], CONCL[id][1], 3, SALAS_INFO[id][2]); som.tocar('trofeu'); tremer(8);
   faiscas(p.x + p.w / 2, p.y + p.h / 2, 30, SALAS_INFO[id][2], k);
   ganhar(id); PV.contar('nuvem-' + id);
-  if (Object.keys(E.nuvens).length >= 5) { ganhar('multicloud'); E.finalEm = E.t + 3.5; }
+  var CLOUDS = ['azure', 'aws', 'gcp', 'oracle', 'ibm'];
+  if (CLOUDS.every(function(c){ return E.nuvens[c]; })) { ganhar('multicloud'); E.finalEm = E.t + 3.5; }
 }
 
 /* Azure: monte a Landing Zone na ordem */
@@ -760,7 +773,7 @@ SALAS.aws = {
       S.tinha = vivos; S.espera -= dt;
       if (vivos === 0 && S.espera <= 0) {
         if (S.onda < S.total) { S.onda++; spawnOnda(S.onda, k); banner('ONDA ' + S.onda + '/' + S.total, 'tráfego chegando', 1.8, '#ff9900'); S.tinha = 1; }
-        else { S.fim = true; concluirSala('aws'); }
+        else { S.fim = true; chamarChefe('aws'); }
       }
     }
     var piso = pisoDe('aws');
@@ -770,6 +783,7 @@ SALAS.aws = {
       if (a.t <= 0) {
         var alvo = null, dm = 520 * k;
         E.ents.forEach(function(e){ if (e.tipo === 'onda' && e.vivo) { var d = Math.abs(e.x + e.w / 2 - a.x); if (d < dm) { dm = d; alvo = e; } } });
+        var RBa = E.rb; if (RBa && RBa.vivo && RBa.ativo && RBa.id === 'aws') { var dB = Math.abs(RBa.x + RBa.w / 2 - a.x); if (dB < dm) { dm = dB; alvo = { x: RBa.x, w: RBa.w }; } }
         if (alvo) {
           var dir = (alvo.x + alvo.w / 2) > a.x ? 1 : -1;
           E.tiros.push({ x: a.x + dir * 12, y: a.y, vx: dir * 720 * k, r: 6 * k, c: 0, fura: false, v: 1, ang: 0 }); a.t = 0.75;
@@ -845,16 +859,16 @@ function tocarSala(e, k){
     if (S.id !== 'azure') return;
     if (e.ord === S.prox) {
       e.vivo = false; S.prox++; E.pontos += 100; som.tocar('skill'); faiscas(e.x, e.y, 16, '#0078d4', k); texto(e.x, e.y - 14, '✔ ' + e.nome, '#5aaaf0', true);
-      if (S.prox > S.total) concluirSala('azure');
+      if (S.prox > S.total) chamarChefe('azure');
     } else if (E.t - S.msgT > 1.3) { S.msgT = E.t; dizer('ordem errada: primeiro ' + nomePeca(S.prox), 2.2); som.tocar('dano'); tremer(3); }
   } else if (e.tipo === 'altar') {
     if (S.id !== 'gcp' || !S.carre.length) return;
     S.entregues += S.carre.length; E.pontos += 100 * S.carre.length; som.tocar('skill'); faiscas(e.x, e.y, 18, '#4285f4', k);
     texto(e.x, e.y - 16, '+' + S.carre.length + ' trecho(s)', '#8ab4f8', true); S.carre = [];
-    if (S.entregues >= S.total) concluirSala('gcp');
+    if (S.entregues >= S.total) chamarChefe('gcp');
   } else if (e.tipo === 'meta') {
     if (S.id !== 'ibm' || S.budget <= 0) return;
-    e.vivo = false; concluirSala('ibm');
+    e.vivo = false; chamarChefe('ibm');
   }
 }
 
@@ -878,7 +892,7 @@ function entrarBonus(sala){
   if (!f || !f.pouso) return;
   f.el.classList.add('revelada');
   if (!E.noBonus) E.retorno = { x: p.x, y: p.y };
-  E.noBonus = true; E.bolas = [];
+  E.noBonus = true; E.bolas = []; E.rb = null; E.raios = [];
   if (!E.salas[id]) { E.salas[id] = true; E.pontos += (id === 'bonus' || id === 'incidentes') ? 1000 : 300; }
   E.segredo = true; ganhar('segredo'); som.tocar('portal'); PV.contar('sala-' + id);
   teleportar(f.pouso.x + f.pouso.w * 0.3, f.pouso.y - p.h - 4);
@@ -891,10 +905,269 @@ function entrarBonus(sala){
 function sairBonus(){
   E.noBonus = false; som.tocar('portal');
   if (E.inc.on) { E.inc.on = false; E.inc.lista.forEach(function(a){ a.ativo = false; }); }
-  E.sala = null;
+  E.sala = null; E.rb = null; E.raios = []; E.bolas = [];
   var r = E.retorno || { x: 60, y: 0 };
   teleportar(r.x, r.y);
 }
+
+/* ---------- chefes das salas (um por mundo) ---------- */
+var CHEFES = {
+  azure: { nome: 'DRIFT', cor: '#0078d4', hp: 10, esc: 3, pad: 'leque', sigla: 'AZ' },
+  aws: { nome: 'TITÃ DO TRÁFEGO', cor: '#ff9900', hp: 12, esc: 3.3, pad: 'mergulho', sigla: 'AWS' },
+  gcp: { nome: 'ALUCINAÇÃO SUPREMA', cor: '#8ab4f8', hp: 10, esc: 3, pad: 'blink', sigla: 'G' },
+  oracle: { nome: 'PATCH ZERO', cor: '#c74634', hp: 12, esc: 3.1, pad: 'raio', sigla: 'OR' },
+  ibm: { nome: 'INCIDENTE P0', cor: '#0f62fe', hp: 12, esc: 3, pad: 'espiral', sigla: 'IBM' },
+  seguranca: { nome: 'HACKER SUPREMO', cor: '#00c878', hp: 16, esc: 3.3, pad: 'hacker', sigla: 'H4X' },
+  redes: { nome: 'BOTNET MESTRE', cor: '#7864ff', hp: 14, esc: 3.2, pad: 'enxame', sigla: 'NET' }
+};
+function marcarBest(id){
+  if (!PV.bestiario.marcar(id)) return;
+  var en = PV.bestiario.achar(id);
+  if (en && E) toast('Bestiário: ' + I18N.t({ pt: en.pt, en: en.en }));
+  if (PV.bestiario.tudo()) ganhar('bestiario');
+}
+function chamarChefe(id){
+  if (E.rb || E.nuvens[id] || !CHEFES[id]) return;
+  var c = CHEFES[id], s = M.esc * c.esc, topo = 0;
+  M.fases.forEach(function(x){ if (x.el.id === id) topo = x.top; });
+  E.rb = { id: id, nome: c.nome, cor: c.cor, pad: c.pad, sigla: c.sigla, hp: c.hp, hpMax: c.hp, s: s, w: 12 * s, h: 8 * s, x: M.W / 2 - 6 * s, y: 0, t: 0,
+           flash: 0, inv: 0, atk: 3, fase2: false, ativo: false, vivo: true, anuncio: E.t + 2.4, est: 'pairar', rt: 0, invis: 0, tpT: 2, rajada: 0, pausa: 0, ang: 0, nb: 0,
+           inv2: 5, tiroT: 2, topo: topo, pisoY: pisoDe(id) };
+  E.raios = [];
+  banner('CHEFE', c.nome, 2.6, c.cor); som.tocar('boss'); dizer('derrote o chefe: ' + c.nome, 5);
+}
+function bolaDe(B, ang, vel, cor, extra){
+  var k = M.esc / 3;
+  var b = { x: B.x + B.w / 2, y: B.y + B.h * 0.7, vx: Math.cos(ang) * vel * k, vy: Math.sin(ang) * vel * k, r: 10 * k, v: 4.5, cor: cor };
+  if (extra) for (var q in extra) b[q] = extra[q];
+  E.bolas.push(b);
+}
+function mirarB(B){ return Math.atan2(p.y + p.h / 2 - (B.y + B.h * 0.7), p.x + p.w / 2 - (B.x + B.w / 2)); }
+function leque(B, n, aber, vel){ var a0 = mirarB(B); for (var i = 0; i < n; i++) bolaDe(B, a0 + (i - (n - 1) / 2) * aber, vel, B.cor); som.tocar('boss'); }
+function reaparecer(B, k, ar, alto){ B.x = 60 + Math.random() * ar; B.y = alto - (100 + Math.random() * 230) * k; faiscas(B.x + B.w / 2, B.y + B.h / 2, 14, B.cor, k); }
+
+function atualizarRB(dt, k){
+  var B = E.rb; if (!B || !B.vivo || !E.noBonus) return;
+  var piso = B.pisoY, ar = Math.max(40, M.W - 120 - B.w), alto = piso - B.h;
+  if (!B.ativo) {
+    B.x = M.W / 2 - B.w / 2; B.y = alto - 220 * k;
+    if (E.t >= B.anuncio) { B.ativo = true; B.atk = 2.5; B.tpT = 1.5; }
+    return;
+  }
+  B.t += dt * (B.fase2 ? 1.4 : 1); B.flash -= dt; B.inv -= dt; B.atk -= dt;
+  switch (B.pad) {
+    case 'leque':
+      B.x = 60 + (Math.sin(B.t * 0.5) * 0.5 + 0.5) * ar; B.y = alto - (110 + (Math.sin(B.t * 0.9) * 0.5 + 0.5) * 190) * k;
+      if (B.atk <= 0) { B.atk = B.fase2 ? 1.6 : 2.3; leque(B, B.fase2 ? 7 : 5, 0.3, 300); }
+      break;
+    case 'mergulho':
+      B.tiroT -= dt;
+      if (B.est === 'pairar') {
+        B.x = 60 + (Math.sin(B.t * 0.6) * 0.5 + 0.5) * ar; B.y = alto - 230 * k + Math.sin(B.t * 1.4) * 14 * k;
+        if (B.tiroT <= 0) { B.tiroT = 2.4; leque(B, 3, 0.26, 320); }
+        if (B.atk <= 0) { B.est = 'mirar'; B.rt = 0.7; B.alvoX = clamp(p.x + p.w / 2 - B.w / 2, 40, M.W - 40 - B.w); }
+      } else if (B.est === 'mirar') {
+        B.rt -= dt; B.x += (B.alvoX - B.x) * Math.min(1, dt * 6); B.flash = Math.max(B.flash, 0.05);
+        if (B.rt <= 0) B.est = 'ir';
+      } else if (B.est === 'ir') {
+        B.y += 1100 * k * dt; B.x += (B.alvoX - B.x) * Math.min(1, dt * 8);
+        if (B.y >= alto) { B.y = alto; B.est = 'chao'; B.rt = 0.6; tremer(10); som.tocar('soco'); faiscas(B.x + B.w / 2, piso, 18, B.cor, k); }
+      } else if (B.est === 'chao') {
+        B.rt -= dt; if (B.rt <= 0) B.est = 'voltar';
+      } else {
+        B.y -= 520 * k * dt;
+        if (B.y <= alto - 230 * k) { B.est = 'pairar'; B.atk = B.fase2 ? 3 : 4.5; }
+      }
+      if (B.inv2 !== undefined) { B.inv2 -= dt; if (B.inv2 <= 0 && E.sala && E.sala.id === 'aws') { B.inv2 = B.fase2 ? 6 : 9; spawnOndaEm('aws', 3, 120, '#ffb84d'); } }
+      break;
+    case 'blink':
+      B.tpT -= dt;
+      if (B.invis > 0) {
+        B.invis -= dt;
+        if (B.invis <= 0) { reaparecer(B, k, ar, alto); bolaDe(B, mirarB(B) - 0.35, 190, B.cor, { homing: true }); bolaDe(B, mirarB(B) + 0.35, 190, B.cor, { homing: true }); som.tocar('boss'); }
+      } else if (B.tpT <= 0) { B.invis = 0.45; B.tpT = B.fase2 ? 2.2 : 3.2; faiscas(B.x + B.w / 2, B.y + B.h / 2, 14, B.cor, k); }
+      break;
+    case 'raio':
+      B.x = 60 + (Math.sin(B.t * 0.35) * 0.5 + 0.5) * ar; B.y = alto - (290 + Math.sin(B.t) * 18) * k;
+      if (B.atk <= 0) {
+        B.atk = B.fase2 ? 2.0 : 2.9; E.raios.push({ x: p.x + p.w / 2, t: 0 });
+        if (B.fase2) E.raios.push({ x: clamp(p.x + p.w / 2 + (Math.random() < 0.5 ? -1 : 1) * 170 * k, 30, M.W - 30), t: -0.2 });
+        som.tocar('boss');
+      }
+      break;
+    case 'espiral':
+      B.x = M.W / 2 - B.w / 2 + Math.sin(B.t * 0.4) * (ar / 2.4); B.y = alto - (240 + Math.sin(B.t * 0.8) * 20) * k;
+      if (B.pausa > 0) B.pausa -= dt;
+      else {
+        B.rajada -= dt;
+        if (B.rajada <= 0) {
+          B.rajada = B.fase2 ? 0.13 : 0.2; B.ang += 0.55; bolaDe(B, B.ang, 230, B.cor); bolaDe(B, B.ang + Math.PI, 230, B.cor); B.nb++;
+          if (B.nb >= 16) { B.nb = 0; B.pausa = B.fase2 ? 1.6 : 2.4; }
+        }
+      }
+      break;
+    case 'hacker':
+      B.tpT -= dt;
+      if (B.invis > 0) { B.invis -= dt; if (B.invis <= 0) { reaparecer(B, k, ar, alto); leque(B, B.fase2 ? 5 : 3, 0.35, 300); } }
+      else if (B.tpT <= 0) { B.invis = 0.4; B.tpT = B.fase2 ? 2.4 : 3.4; faiscas(B.x + B.w / 2, B.y + B.h / 2, 14, B.cor, k); }
+      B.inv2 -= dt;
+      if (B.inv2 <= 0 && E.sala && E.sala.id === 'seguranca') { B.inv2 = B.fase2 ? 6 : 9; invocarMalware(3, B.fase2); texto(B.x + B.w / 2, B.y - 8, 'malware!', '#8dffc9', true); }
+      break;
+    case 'enxame':
+      B.x = 60 + (Math.sin(B.t * 0.45) * 0.5 + 0.5) * ar; B.y = alto - (130 + (Math.sin(B.t * 0.8) * 0.5 + 0.5) * 150) * k;
+      if (B.atk <= 0) { B.atk = B.fase2 ? 1.8 : 2.6; leque(B, 3, 0.35, 280); }
+      B.inv2 -= dt;
+      if (B.inv2 <= 0 && E.sala && E.sala.id === 'redes') { B.inv2 = B.fase2 ? 6 : 8; spawnOndaEm('redes', 3, 110, '#7864ff'); }
+      break;
+  }
+  // raios verticais (Patch Zero): aviso, depois dano
+  for (var i = E.raios.length - 1; i >= 0; i--) {
+    var r = E.raios[i]; r.t += dt;
+    if (r.t > 0.9 && r.t < 1.3 && !r.acertou && p.dashT <= 0 && p.invuln <= 0 && Math.abs(p.x + p.w / 2 - r.x) < 28 * k + p.w / 2) { r.acertou = true; machucar(r.x, k); if (modo !== 'jogando') return; }
+    if (r.t > 1.4) E.raios.splice(i, 1);
+  }
+  // contato com o jogador
+  if (!(B.invis > 0)) {
+    var m = 6 * k;
+    if (p.x + p.w > B.x + m && p.x < B.x + B.w - m && p.y + p.h > B.y + m && p.y < B.y + B.h - m) {
+      var cima = p.vy > 0 && p.pesAntes <= B.y + B.h * 0.45;
+      if (p.socando === 2) danoRB(3, k);
+      else if (p.dashT > 0) danoRB(1, k);
+      else if (cima) { danoRB(2, k); p.vy = -C.quiqueAlto * k; p.quicando = true; p.pulosAr = 1; p.dashes = 1; }
+      else if (p.invuln <= 0) { machucar(B.x + B.w / 2, k); if (modo !== 'jogando') return; }
+    }
+  }
+}
+function danoRB(n, k){
+  var B = E.rb; if (!B || !B.vivo || !B.ativo || B.inv > 0 || B.invis > 0) return;
+  k = k || M.esc / 3;
+  B.hp -= n; B.inv = 0.25; B.flash = 0.2; E.pontos += 40 * n;
+  som.tocar('esmaga', 4); tremer(6 + n * 2);
+  faiscas(B.x + B.w / 2, B.y + B.h / 2, 12 + n * 4, B.cor, k);
+  texto(B.x + B.w / 2, B.y - 6, '-' + n, '#ffd890', true);
+  if (!B.fase2 && B.hp <= B.hpMax / 2) { B.fase2 = true; banner('FÚRIA!', B.nome, 1.8, B.cor); som.tocar('boss'); }
+  if (B.hp <= 0) {
+    B.vivo = false; E.bolas = []; E.raios = []; E.pontos += 1500; E.bugs++;
+    for (var i = 0; i < 60; i++) particula(B.x + B.w / 2, B.y + B.h / 2, rnd(-500, 500) * k, rnd(-600, 160) * k, rnd(.7, 1.3), i % 3 ? B.cor : (i % 2 ? '#fff' : '#e0a84f'), rnd(4, 9) * k, 900 * k);
+    anel(B.x + B.w / 2, B.y + B.h / 2, 200 * k, B.cor, .8, 5);
+    marcarBest('boss_' + B.id); tremer(16); concluirSala(B.id);
+  }
+}
+function desenharRB(){
+  var B = E.rb, i;
+  for (i = 0; i < E.raios.length; i++) {
+    var r = E.raios[i], topo = B ? B.topo : 0, piso = B ? B.pisoY : 0, k2 = M.esc / 3;
+    if (r.t < 0) continue;
+    if (r.t < 0.9) {
+      cx.setLineDash([10, 8]); cx.strokeStyle = 'rgba(255,90,70,' + (0.45 + 0.4 * Math.sin(E.t * 18)) + ')'; cx.lineWidth = 3;
+      cx.beginPath(); cx.moveTo(r.x, topo); cx.lineTo(r.x, piso); cx.stroke(); cx.setLineDash([]);
+    } else if (r.t < 1.3) {
+      var gr = cx.createLinearGradient(r.x - 30 * k2, 0, r.x + 30 * k2, 0);
+      gr.addColorStop(0, 'rgba(255,90,70,0)'); gr.addColorStop(.5, 'rgba(255,255,255,.95)'); gr.addColorStop(1, 'rgba(255,90,70,0)');
+      cx.fillStyle = gr; cx.fillRect(r.x - 30 * k2, topo, 60 * k2, piso - topo);
+    }
+  }
+  if (!B || !B.vivo || !E.noBonus) return;
+  var al = B.invis > 0 ? 0.18 : 1, cxm = B.x + B.w / 2, cym = B.y + B.h / 2;
+  cx.globalAlpha = al;
+  var g = cx.createRadialGradient(cxm, cym, B.w * 0.1, cxm, cym, B.w * 0.9);
+  g.addColorStop(0, B.fase2 ? 'rgba(255,40,80,.35)' : 'rgba(255,255,255,.18)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  cx.fillStyle = g; cx.beginPath(); cx.arc(cxm, cym, B.w * 0.9, 0, 7); cx.fill();
+  mapa(BUG, B.x, B.y + (Math.sin(B.t * 10) > 0 ? 0 : -3), B.s, { R: B.cor, V: '#12122a', W: '#fff' });
+  cx.fillStyle = '#fff'; cx.font = '700 ' + Math.round(B.s * 1.6) + 'px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText(B.sigla, cxm, cym + B.s * 0.6);
+  if (B.est === 'mirar') { cx.fillStyle = '#ff4d4d'; cx.font = '700 28px Silkscreen, monospace'; cx.fillText('!', cxm, B.y - 18); }
+  if (B.flash > 0 && B.ativo) { cx.globalAlpha = 0.6; cx.fillStyle = '#fff'; cx.fillRect(B.x, B.y, B.w, B.h); }
+  cx.globalAlpha = 1;
+}
+
+/* ---------- sala de segurança: defenda o sistema ---------- */
+var MAL = { virus: { w: 8, h: 7, vel: 150, dano: 6, hp: 1 }, worm: { w: 12, h: 6, vel: 90, dano: 8, hp: 1 }, ransom: { w: 12, h: 12, vel: 55, dano: 16, hp: 3 } };
+function spawnMalware(kind, x, lado, idx){
+  var d = MAL[kind], piso = pisoDe('seguranca'), w = d.w * M.esc, h = d.h * M.esc;
+  E.ents.push({ tipo: 'malware', kind: kind, dyn: true, vivo: true, oculto: false, secao: 'seguranca', x: x !== undefined ? x : (lado ? M.W + 20 + (idx || 0) * 30 : -w - 20 - (idx || 0) * 30),
+                y: piso - h, w: w, h: h, pisoY: piso, vel: d.vel + rnd(0, 20), dano: d.dano, hp: d.hp, hpMax: d.hp });
+}
+function invocarMalware(n, forte){
+  var tipos = ['virus', 'worm', 'virus', 'ransom'];
+  for (var i = 0; i < n; i++) spawnMalware(tipos[Math.floor(Math.random() * (forte ? 4 : 3))], undefined, i % 2, i);
+}
+function spawnOndaMalware(n){
+  var lista = n === 1 ? ['virus', 'virus', 'virus', 'virus', 'virus'] : (n === 2 ? ['virus', 'virus', 'virus', 'virus', 'worm', 'worm', 'worm'] : ['virus', 'virus', 'virus', 'worm', 'worm', 'worm', 'ransom', 'ransom']);
+  lista.forEach(function(kd, i){ spawnMalware(kd, undefined, i % 2, i); });
+}
+function spawnOndaEm(secao, qtd, vel, cor){
+  var piso = pisoDe(secao);
+  for (var i = 0; i < qtd; i++) {
+    var lado = i % 2, w = 8 * M.esc, h = 8 * M.esc;
+    E.ents.push({ tipo: 'onda', dyn: true, vivo: true, oculto: false, secao: secao, x: lado ? M.W + 20 + i * 26 : -w - 20 - i * 26, y: piso - h, w: w, h: h, pisoY: piso, vel: vel + rnd(0, 25), dir: lado ? -1 : 1, cor: cor });
+  }
+}
+SALAS.seguranca = {
+  ini: function(S){
+    S.integ = 100; S.onda = 0; S.total = 3; S.espera = 2.5; S.fim = false; S.tinha = 0;
+    S.core = { x: M.W / 2, w: 96 * (M.esc / 3), h: 64 * (M.esc / 3) };
+    E.ents = E.ents.filter(function(e){ return e.tipo !== 'malware'; });
+    dizer('malwares invadem em ondas: proteja o núcleo do sistema', 6);
+  },
+  upd: function(S, dt, k){
+    var tx = S.core.x;
+    E.ents.forEach(function(e){
+      if (e.tipo !== 'malware' || !e.vivo) return;
+      var cxm = e.x + e.w / 2;
+      e.x += (tx > cxm ? 1 : -1) * e.vel * k * dt; e.y = e.pisoY - e.h;
+      if (Math.abs(cxm - tx) < S.core.w * 0.5 + e.w * 0.3) {
+        S.integ = Math.max(0, S.integ - e.dano); e.vivo = false; som.tocar('dano'); tremer(6);
+        faiscas(tx, e.pisoY - 20 * k, 12, '#ff4d7e', k); texto(tx, e.pisoY - S.core.h - 10, '-' + e.dano + '%', '#ff8fae', true);
+      }
+    });
+    if (S.integ <= 0) {
+      banner('SISTEMA COMPROMETIDO', 'reiniciando a defesa', 3, '#ff4d7e'); som.tocar('morte');
+      E.ents = E.ents.filter(function(e){ return e.tipo !== 'malware'; });
+      E.rb = null; E.raios = []; E.bolas = []; S.integ = 100; S.onda = 0; S.espera = 3; S.fim = false; S.tinha = 0;
+      return;
+    }
+    if (E.rb && E.rb.id === 'seguranca') return;
+    var n = E.ents.filter(function(e){ return e.tipo === 'malware' && e.vivo; }).length;
+    if (!S.fim) {
+      if (S.tinha > 0 && n === 0) S.espera = 2;
+      S.tinha = n; S.espera -= dt;
+      if (n === 0 && S.espera <= 0) {
+        if (S.onda < S.total) { S.onda++; spawnOndaMalware(S.onda); banner('ONDA ' + S.onda + '/' + S.total, 'malware invadindo', 1.8, '#00c878'); S.tinha = 1; }
+        else { S.fim = true; chamarChefe('seguranca'); }
+      }
+    }
+  },
+  hud: function(S){
+    var n = E.ents.filter(function(e){ return e.tipo === 'malware' && e.vivo; }).length;
+    return { txt: 'SISTEMA ' + Math.round(S.integ) + '% · ONDA ' + Math.max(1, S.onda) + '/' + S.total + ' · malwares ' + n, pct: S.integ / 100, cor: S.integ > 50 ? '#34d399' : (S.integ > 25 ? '#e0a84f' : '#ff4d7e') };
+  }
+};
+function desenharNucleo(){
+  var S = E.sala; if (!S || S.id !== 'seguranca' || !E.noBonus || !S.core) return;
+  var c = S.core, piso = pisoDe('seguranca'), x = c.x - c.w / 2, y = piso - c.h, t = E.t;
+  var cor = S.integ > 50 ? '#34d399' : (S.integ > 25 ? '#e0a84f' : '#ff4d7e');
+  var g = cx.createRadialGradient(c.x, y + c.h / 2, c.w * 0.2, c.x, y + c.h / 2, c.w * 1.1);
+  g.addColorStop(0, 'rgba(52,211,153,.35)'); g.addColorStop(1, 'rgba(52,211,153,0)');
+  cx.fillStyle = g; cx.beginPath(); cx.arc(c.x, y + c.h / 2, c.w * 1.1, 0, 7); cx.fill();
+  cx.fillStyle = '#05201a'; cx.fillRect(x, y, c.w, c.h); cx.strokeStyle = cor; cx.lineWidth = 3; cx.strokeRect(x, y, c.w, c.h);
+  cx.fillStyle = cor; for (var i = 0; i < 4; i++) cx.fillRect(x + 8, y + 10 + i * 12 * (c.h / 64), 4, 4);
+  for (i = 0; i < 4; i++) { cx.globalAlpha = 0.4 + 0.5 * Math.abs(Math.sin(t * 3 + i)); cx.fillRect(x + 18, y + 11 + i * 12 * (c.h / 64), c.w - 30, 3); }
+  cx.globalAlpha = 1;
+  cx.fillStyle = '#fff'; cx.font = '700 ' + Math.round(10 * (M.esc / 3)) + 'px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  cx.fillText(tr('SISTEMA') + ' ' + Math.round(S.integ) + '%', c.x, y - 12);
+}
+
+/* ---------- sala de redes: restaure a conexão ---------- */
+SALAS.redes = {
+  ini: function(S){
+    var inf = entsDa('redes', 'infeccao');
+    inf.forEach(function(e){ e.vivo = true; e.hp = e.hpMax; e.tiro = rnd(1, 2.5); });
+    S.total = inf.length; S.cura = 0;
+    E.ents = E.ents.filter(function(e){ return !(e.tipo === 'onda' && e.secao === 'redes'); });
+    dizer('destrua as infecções da rede para restaurar a conexão', 6);
+  },
+  hud: function(S){ return { txt: 'CONEXÃO ' + S.cura + '/' + S.total + ' · infecções ' + (S.total - S.cura), pct: S.cura / S.total, cor: '#a99bff' }; }
+};
 
 /* ---------- chefão: Bug Gigante ---------- */
 function criarBoss(){
@@ -913,7 +1186,7 @@ function danoBoss(n, k){
     banner('BUG GIGANTE DERROTADO', '+2000', 3, '#e0a84f'); som.tocar('trofeu'); tremer(16);
     for (var i = 0; i < 70; i++) particula(B.x + B.w / 2, B.y + B.h / 2, rnd(-520, 520) * k, rnd(-620, 180) * k, rnd(.7, 1.4), i % 3 ? '#ff4d7e' : (i % 2 ? '#fff' : '#e0a84f'), rnd(4, 9) * k, 900 * k);
     anel(B.x + B.w / 2, B.y + B.h / 2, 220 * k, '#e0a84f', .8, 5);
-    ganhar('boss'); som.musica.modo('normal');
+    ganhar('boss'); marcarBest('boss_bug'); som.musica.modo('normal');
     E.fimEm = E.t + 3;
   }
 }
@@ -943,7 +1216,13 @@ function atualizarBoss(dt, k){
 }
 function atualizarBolas(dt, k){
   for (var i = E.bolas.length - 1; i >= 0; i--) {
-    var b = E.bolas[i]; b.v -= dt; b.x += b.vx * dt; b.y += b.vy * dt;
+    var b = E.bolas[i]; b.v -= dt;
+    if (b.homing) {
+      var hx = (p.x + p.w / 2) - b.x, hy = (p.y + p.h / 2) - b.y, hd = Math.sqrt(hx * hx + hy * hy) || 1, sp0 = Math.sqrt(b.vx * b.vx + b.vy * b.vy) || 1;
+      b.vx += hx / hd * 300 * k * dt; b.vy += hy / hd * 300 * k * dt;
+      var sp1 = Math.sqrt(b.vx * b.vx + b.vy * b.vy) || 1; b.vx *= sp0 / sp1; b.vy *= sp0 / sp1;
+    }
+    b.x += b.vx * dt; b.y += b.vy * dt;
     var dx = clamp(b.x, p.x, p.x + p.w) - b.x, dy = clamp(b.y, p.y, p.y + p.h) - b.y, gone = b.v <= 0 || b.x < -40 || b.x > M.W + 40;
     if (!gone && dx * dx + dy * dy < b.r * b.r && p.dashT <= 0 && p.invuln <= 0 && modo === 'jogando') { machucar(b.x, k); gone = true; }
     if (gone) { faiscas(b.x, b.y, 4, b.cor, k); E.bolas.splice(i, 1); if (modo !== 'jogando') return; }
@@ -998,6 +1277,11 @@ function atualizarTiros(dt, k){
       var bx = clamp(t.x, B.x, B.x + B.w) - t.x, by = clamp(t.y, B.y, B.y + B.h) - t.y;
       if (bx * bx + by * by < t.r * t.r && B.inv <= 0) { danoBoss(t.c > .55 ? 3 : 1, k); morre = true; }
     }
+    var RB = E.rb;
+    if (RB && RB.vivo && RB.ativo && !(RB.invis > 0) && !morre && E.noBonus) {
+      var rbx = clamp(t.x, RB.x, RB.x + RB.w) - t.x, rby = clamp(t.y, RB.y, RB.y + RB.h) - t.y;
+      if (rbx * rbx + rby * rby < t.r * t.r && RB.inv <= 0) { danoRB(t.c > .55 ? 3 : 1, k); morre = true; }
+    }
     for (var q = E.bolas.length - 1; q >= 0 && !morre; q--) {
       var bo = E.bolas[q];
       if (Math.abs(bo.x - t.x) < t.r + bo.r && Math.abs(bo.y - t.y) < t.r + bo.r) { faiscas(bo.x, bo.y, 6, bo.cor, k); E.bolas.splice(q, 1); E.pontos += 20; if (!t.fura) morre = true; }
@@ -1028,7 +1312,30 @@ function atualizarEntidades(dt, k){
     if (e.inv > 0) e.inv -= dt;
     if (e.flash > 0) e.flash -= dt;
     if (e.tipo === 'bug' || e.tipo === 'fatura') patrulhar(e, dt, k, false);
-    else if (e.tipo === 'crash') {
+    else if (e.tipo === 'phishing') {
+      patrulhar(e, dt, k, !e.revelado);
+      if (!e.revelado && Math.abs((p.x + p.w / 2) - (e.x + e.w / 2)) < 110 * k && Math.abs((p.y + p.h / 2) - (e.y + e.h / 2)) < 90 * k) {
+        e.revelado = true; som.tocar('dano'); faiscas(e.x + e.w / 2, e.y + e.h / 2, 10, '#ff4d7e', k); texto(e.x + e.w / 2, e.y - 6, 'phishing!', '#ff8fae', true);
+      }
+    } else if (e.tipo === 'miner') {
+      patrulhar(e, dt, k, false);
+      if (modo === 'jogando' && Math.abs((p.x + p.w / 2) - (e.x + e.w / 2)) < 170 * k && Math.abs((p.y + p.h / 2) - (e.y + e.h / 2)) < 120 * k) E.reiki = Math.max(0, E.reiki - 55 * dt);
+    } else if (e.tipo === 'ransom') {
+      patrulhar(e, dt, k, false);
+      e.tiro -= dt;
+      if (e.tiro <= 0) {
+        e.tiro = 3;
+        var rdx = (p.x + p.w / 2) - (e.x + e.w / 2), rdy = (p.y + p.h / 2) - (e.y + e.h / 2), rd = Math.sqrt(rdx * rdx + rdy * rdy) || 1;
+        if (modo === 'jogando' && rd < 620 * k) E.bolas.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: rdx / rd * 190 * k, vy: rdy / rd * 190 * k, r: 8 * k, v: 4, cor: '#9b5cff' });
+      }
+    } else if (e.tipo === 'infeccao') {
+      e.tiro -= dt;
+      if (e.tiro <= 0 && modo === 'jogando' && E.sala && E.sala.id === 'redes' && e.x !== undefined) {
+        e.tiro = 2.6;
+        var idx = (p.x + p.w / 2) - (e.x + e.w / 2), idy = (p.y + p.h / 2) - (e.y + e.h / 2), id2 = Math.sqrt(idx * idx + idy * idy) || 1;
+        if (id2 < 650 * k) E.bolas.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: idx / id2 * 210 * k, vy: idy / id2 * 210 * k, r: 7 * k, v: 4, cor: '#a99bff' });
+      }
+    } else if (e.tipo === 'crash') {
       e.ciclo += dt;
       if (e.quebra > 0) e.quebra -= dt; else if (e.ciclo > 2.8) { e.ciclo = 0; e.quebra = 0.5; }
       patrulhar(e, dt, k, e.quebra > 0);
@@ -1058,7 +1365,7 @@ function matarInimigo(e, k){
   e.vivo = false; E.bugs++;
   var mult = Math.max(1, E.combo), pts = 50 * mult;
   E.pontos += pts; som.tocar('esmaga', E.combo);
-  var cor = { bug: '#ff4d7e', crash: '#4aa3ff', vaza: '#e0a84f', fatura: '#34d399', onda: '#ff9900', alucina: '#8ab4f8' }[e.tipo] || '#9b5cff';
+  var cor = { bug: '#ff4d7e', crash: '#4aa3ff', vaza: '#e0a84f', fatura: '#34d399', onda: '#ff9900', alucina: '#8ab4f8', phishing: '#ff4d7e', miner: '#9ca3af', ransom: '#9b5cff', malware: '#34d399', infeccao: '#7864ff' }[e.tipo] || '#9b5cff';
   for (var i = 0; i < 14; i++) particula(e.x + e.w / 2, e.y + e.h / 2, rnd(-300, 300) * k, rnd(-420, -60) * k, rnd(.35, .7), i % 4 ? cor : '#fff', rnd(3, 6) * k, 1200 * k);
   texto(e.x + e.w / 2, e.y - 4, '+' + pts + (mult > 1 ? '  x' + mult : ''), mult > 1 ? '#e0a84f' : '#eaf1f5');
   tremer(5);
@@ -1066,6 +1373,13 @@ function matarInimigo(e, k){
   if (E.combo >= 5) ganhar('combo5');
   if (p.dashT > 0) ganhar('dash');
   if (e.tipo === 'fatura') ganhar('finops');
+  marcarBest(e.tipo === 'malware' ? e.kind : e.tipo);
+  if (e.tipo === 'phishing') ganhar('phishing');
+  if (e.tipo === 'malware' && e.kind === 'worm' && E.sala && E.sala.id === 'seguranca') { spawnMalware('virus', e.x - 14); spawnMalware('virus', e.x + 14); }
+  if (e.tipo === 'infeccao' && E.sala && E.sala.id === 'redes') {
+    var S2 = E.sala; S2.cura++; texto(e.x + e.w / 2, e.y - 14, 'conexão restaurada: ' + e.nome, '#c9b8ff', true); som.tocar('etapa');
+    if (S2.cura >= S2.total) chamarChefe('redes');
+  }
 }
 
 /* dano em inimigo: alguns têm mais de 1 de vida (a fatura de cloud tem 3) */
@@ -1128,7 +1442,7 @@ function coletar(e, k){
     case 'item':
       if (E.sala && E.sala.id === e.sala) {
         E.sala.n++; E.pontos += 100; som.tocar('skill'); faiscas(e.x, e.y, 14, '#c74634', k); texto(e.x, e.y - 14, '+ ' + e.nome, '#e58a7c', true);
-        if (E.sala.n >= E.sala.total) concluirSala(e.sala);
+        if (E.sala.n >= E.sala.total) chamarChefe(e.sala);
       }
       break;
     case 'badge':
@@ -1153,6 +1467,7 @@ function colisoes(k){
     var e = E.ents[i];
     if (!e.vivo || e.oculto || e.x === undefined) continue;
     if (INIM[e.tipo]) {
+      if (e.tipo === 'phishing' && !e.revelado) continue;
       var m = 3 * k;
       if (x1 > e.x + m && x0 < e.x + e.w - m && y1 > e.y + m && y0 < e.y + e.h - m) {
         var deCima = p.vy > 0 && p.pesAntes <= e.y + e.h * 0.6;
@@ -1190,7 +1505,7 @@ function acompanharFase(){
 }
 
 function tutorial(){
-  if (E.terminou && E.faseAtual === M.ultima && !E.noBonus && Object.keys(E.salas).length < 7) { dizer('fim da linha! Há salas secretas escondidas: procure os blocos ? e !', 9999); return; }
+  if (E.terminou && E.faseAtual === M.ultima && !E.noBonus && Object.keys(E.salas).length < 9) { dizer('fim da linha! Há salas secretas escondidas: procure os blocos ? e !', 9999); return; }
   if (E.speed || E.tour || E.faseMax > 0) return;
   if (!E.tut.andou) dizer('← → andam · espaço pula', 9999);
   else if (!E.tut.pulou2 && E.t < 12) dizer('espaço de novo no ar: pulo duplo', 9999);
@@ -1240,6 +1555,7 @@ function passo(dt){
     atualizarBolas(dt, k);
     atualizarPlantao(dt);
     atualizarSala(dt, k);
+    atualizarRB(dt, k);
     colisoes(k);
     E.reiki = Math.min(100, E.reiki + (p.mirando ? 0 : 18) * dt);
     if (p.poseT > 0) p.poseT -= dt;
@@ -1372,6 +1688,55 @@ function desenharEntidades(topo, base){
         cx.strokeStyle = SC[2]; cx.lineWidth = 3; cx.strokeRect(e.x - sz / 2, e.y + bz - sz / 2, sz, sz);
         cx.fillStyle = '#fff0c4'; cx.font = '700 ' + 22 * (s / 3) + 'px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
         cx.fillText(SC[3], e.x, e.y + bz + 2); break; }
+      case 'phishing': {
+        var phx = e.x + e.w / 2, phy = e.y + e.h / 2;
+        if (!e.revelado) { mapa(BIT, phx - 2.5 * s, phy - 2.5 * s + Math.sin(t * 4 + e.x * 0.05) * 3, s); break; }
+        cx.fillStyle = '#ff4d7e'; cx.beginPath(); cx.moveTo(phx, phy - e.h / 2); cx.lineTo(phx + e.w / 2, phy); cx.lineTo(phx, phy + e.h / 2); cx.lineTo(phx - e.w / 2, phy); cx.closePath(); cx.fill();
+        cx.fillStyle = '#fff'; cx.fillRect(phx - e.w * 0.25, phy - e.h * 0.1, 4, 5); cx.fillRect(phx + e.w * 0.1, phy - e.h * 0.1, 4, 5);
+        cx.fillStyle = '#070b14'; for (var tz = 0; tz < 4; tz++) cx.fillRect(phx - e.w * 0.28 + tz * (e.w * 0.19), phy + e.h * 0.12, 3, 5);
+        if (e.flash > 0) { cx.globalAlpha = .6; cx.fillStyle = '#fff'; cx.fillRect(e.x, e.y, e.w, e.h); cx.globalAlpha = 1; }
+        break; }
+      case 'miner': {
+        cx.fillStyle = '#4b5563'; cx.fillRect(e.x, e.y, e.w, e.h); cx.strokeStyle = '#111827'; cx.lineWidth = 3; cx.strokeRect(e.x, e.y, e.w, e.h);
+        var mcx = e.x + e.w / 2, mcy = e.y + e.h / 2, mr = e.h * 0.34;
+        cx.fillStyle = '#111827'; cx.beginPath(); cx.arc(mcx, mcy, mr, 0, 7); cx.fill();
+        cx.strokeStyle = '#34d399'; cx.lineWidth = 3; for (var bl = 0; bl < 4; bl++) { var ab = t * 8 + bl * 1.5708; cx.beginPath(); cx.moveTo(mcx, mcy); cx.lineTo(mcx + Math.cos(ab) * mr, mcy + Math.sin(ab) * mr); cx.stroke(); }
+        cx.fillStyle = '#fbbf24'; cx.fillRect(e.x + 3, e.y + 3, 5, 3);
+        if (e.flash > 0) { cx.globalAlpha = .6; cx.fillStyle = '#fff'; cx.fillRect(e.x, e.y, e.w, e.h); cx.globalAlpha = 1; }
+        break; }
+      case 'ransom': {
+        cx.fillStyle = '#6b3fc4'; cx.fillRect(e.x, e.y + e.h * 0.38, e.w, e.h * 0.62); cx.strokeStyle = '#d7e3ff'; cx.lineWidth = 4;
+        cx.beginPath(); cx.arc(e.x + e.w / 2, e.y + e.h * 0.38, e.w * 0.28, Math.PI, 0); cx.stroke();
+        cx.fillStyle = '#0b0620'; cx.beginPath(); cx.arc(e.x + e.w / 2, e.y + e.h * 0.62, e.w * 0.1, 0, 7); cx.fill(); cx.fillRect(e.x + e.w / 2 - 2, e.y + e.h * 0.62, 4, e.h * 0.18);
+        cx.fillStyle = '#ff4d7e'; for (var hp3 = 0; hp3 < e.hp; hp3++) cx.fillRect(e.x + 3 + hp3 * 9, e.y - 8, 7, 4);
+        if (e.flash > 0) { cx.globalAlpha = .6; cx.fillStyle = '#fff'; cx.fillRect(e.x, e.y, e.w, e.h); cx.globalAlpha = 1; }
+        break; }
+      case 'malware': {
+        var mx2 = e.x + e.w / 2, my2 = e.y + e.h / 2;
+        if (e.kind === 'virus') {
+          cx.fillStyle = '#34d399'; cx.beginPath(); cx.arc(mx2, my2, e.w * 0.36, 0, 7); cx.fill(); cx.strokeStyle = '#34d399'; cx.lineWidth = 2;
+          for (var sp = 0; sp < 8; sp++) { var as = sp * 0.785 + t * 2; cx.beginPath(); cx.moveTo(mx2 + Math.cos(as) * e.w * 0.36, my2 + Math.sin(as) * e.w * 0.36); cx.lineTo(mx2 + Math.cos(as) * e.w * 0.58, my2 + Math.sin(as) * e.w * 0.58); cx.stroke(); }
+          cx.fillStyle = '#04261a'; cx.fillRect(mx2 - 5, my2 - 3, 3, 3); cx.fillRect(mx2 + 2, my2 - 3, 3, 3);
+        } else if (e.kind === 'worm') {
+          for (var sg = 0; sg < 3; sg++) { cx.fillStyle = sg === 0 ? '#ff8fae' : '#d6264a'; cx.beginPath(); cx.arc(e.x + e.w * (0.2 + sg * 0.3), e.y + e.h * 0.55 + Math.sin(t * 8 + sg) * 3, e.h * 0.5, 0, 7); cx.fill(); }
+        } else {
+          cx.fillStyle = '#6b3fc4'; cx.fillRect(e.x, e.y + e.h * 0.38, e.w, e.h * 0.62); cx.strokeStyle = '#d7e3ff'; cx.lineWidth = 4;
+          cx.beginPath(); cx.arc(e.x + e.w / 2, e.y + e.h * 0.38, e.w * 0.28, Math.PI, 0); cx.stroke();
+          cx.fillStyle = '#ff4d7e'; for (var hp4 = 0; hp4 < e.hp; hp4++) cx.fillRect(e.x + 3 + hp4 * 9, e.y - 8, 7, 4);
+        }
+        if (e.flash > 0) { cx.globalAlpha = .6; cx.fillStyle = '#fff'; cx.fillRect(e.x, e.y, e.w, e.h); cx.globalAlpha = 1; }
+        break; }
+      case 'infeccao': {
+        var ix = e.x + e.w / 2, iy = e.y + e.h / 2, ip = 0.5 + 0.5 * Math.sin(t * 6);
+        var gi = cx.createRadialGradient(ix, iy, 0, ix, iy, e.w * 1.2); gi.addColorStop(0, 'rgba(120,100,255,' + (0.35 + 0.25 * ip) + ')'); gi.addColorStop(1, 'rgba(120,100,255,0)');
+        cx.fillStyle = gi; cx.beginPath(); cx.arc(ix, iy, e.w * 1.2, 0, 7); cx.fill();
+        cx.fillStyle = '#1a0a2e'; cx.beginPath(); cx.arc(ix, iy, e.w * 0.46, 0, 7); cx.fill(); cx.strokeStyle = '#7864ff'; cx.lineWidth = 3; cx.stroke();
+        cx.fillStyle = '#ff4d7e'; cx.fillRect(ix - e.w * 0.24, iy - e.h * 0.12, 5, 6); cx.fillRect(ix + e.w * 0.1, iy - e.h * 0.12, 5, 6);
+        cx.fillStyle = '#a99bff'; for (var ps = 0; ps < 3; ps++) cx.fillRect(ix - e.w * 0.28 + ps * (e.w * 0.28), iy + e.h * 0.16 + Math.sin(t * 9 + ps) * 2, 5, 4);
+        cx.fillStyle = '#c9b8ff'; cx.font = '700 ' + 9 * (s / 3) + 'px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText(e.nome, ix, e.y - 10);
+        for (var hp5 = 0; hp5 < e.hp; hp5++) { cx.fillStyle = '#ff4d7e'; cx.fillRect(e.x + 3 + hp5 * 9, e.y - 22, 7, 4); }
+        if (e.flash > 0) { cx.globalAlpha = .6; cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(ix, iy, e.w * 0.5, 0, 7); cx.fill(); cx.globalAlpha = 1; }
+        break; }
       case 'peca': chip(e.x, e.y, e.ord + ' ' + e.nome, '#5aaaf0', 'rgba(0,120,212,.22)', s, Math.sin(t * 3 + e.ord) * 4); break;
       case 'ec2': {
         var ez2 = Math.sin(t * 3 + e.x * 0.01) * 4, sq = 16 * (s / 3);
@@ -1391,7 +1756,7 @@ function desenharEntidades(topo, base){
         cx.fillStyle = '#fff'; cx.font = '700 ' + 9 * (s / 3) + 'px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText('SLO', e.x + 12 * (s / 3), e.y - mh * 0.4 + 1); break; }
       case 'onda': {
         cx.save(); cx.translate(e.x + e.w / 2, e.y + e.h / 2); cx.scale((p.x + p.w / 2) > (e.x + e.w / 2) ? 1 : -1, 1); cx.translate(-e.w / 2, -e.h / 2);
-        mapa(BUG, 0, Math.sin(t * 14 + e.x) > 0 ? 0 : -1, s * 0.8, { R: '#ff9900', V: '#b36b00', W: '#fff' }); cx.restore(); break; }
+        mapa(BUG, 0, Math.sin(t * 14 + e.x) > 0 ? 0 : -1, s * 0.8, { R: e.cor || '#ff9900', V: e.cor ? '#1a1a2e' : '#b36b00', W: '#fff' }); cx.restore(); break; }
       case 'alucina': {
         var wob = Math.sin(t * 5 + e.ph) * 3, ghx = e.x + e.w / 2, ghy = e.y + e.h / 2 + wob;
         cx.globalAlpha = 0.85; cx.fillStyle = '#d7e3ff'; cx.beginPath(); cx.arc(ghx, ghy - e.h * 0.1, e.w * 0.5, Math.PI, 0); cx.lineTo(ghx + e.w * 0.5, ghy + e.h * 0.5);
@@ -1467,6 +1832,8 @@ function desenharMundo(){
   cx.translate(tx, -sy + ty);
   desenharEntidades(topo, base);
   desenharBoss();
+  desenharRB();
+  desenharNucleo();
   var i;
   if (E.sala && E.sala.id === 'aws' && E.sala.al) {
     E.sala.al.forEach(function(a){
@@ -1574,6 +1941,14 @@ function desenharHUD(){
     }
     textoPixel(hh.txt, W / 2, hy - 10, hh.cor || '#c9f6fc', 11, 'center');
   }
+  var RBh = E.rb;
+  if (RBh && RBh.vivo && RBh.ativo && E.noBonus) {
+    var rw = Math.min(340, W - 40), rx = W / 2 - rw / 2, ry = compacto ? y0 + 96 : y0 + 52;
+    cx.fillStyle = '#1a0a14'; cx.fillRect(rx, ry, rw, 10);
+    cx.fillStyle = RBh.fase2 ? '#ff2d55' : RBh.cor; cx.fillRect(rx, ry, rw * Math.max(0, RBh.hp) / RBh.hpMax, 10);
+    cx.strokeStyle = '#fff'; cx.lineWidth = 1; cx.strokeRect(rx, ry, rw, 10);
+    textoPixel(RBh.nome, W / 2, ry - 9, '#ffd0dc', 11, 'center');
+  }
   var TB = E.tour;
   if (TB && TB.texto) {
     var txb = I18N.t(TB.texto), bw2 = Math.min(580, W - 24);
@@ -1589,7 +1964,7 @@ function desenharHUD(){
   for (i = 0; i < E.toasts.length; i++) {
     var ts = E.toasts[i], al = Math.min(1, ts.t * 4, (3.6 - ts.t) * 2);
     cx.globalAlpha = Math.max(0, al);
-    var tw = cx.measureText(tr(ts.txt)).width + 40, ty = y0 + (compacto ? 96 : 56) + i * 34;
+    var tw = cx.measureText(tr(ts.txt)).width + 40, ty = y0 + (compacto ? 96 : 56) + (E.rb && E.rb.vivo && E.rb.ativo && E.noBonus ? 40 : 0) + i * 34;
     cx.fillStyle = 'rgba(11,24,40,.92)'; cx.fillRect(W / 2 - tw / 2, ty - 14, tw, 28);
     cx.strokeStyle = '#e0a84f'; cx.lineWidth = 2; cx.strokeRect(W / 2 - tw / 2, ty - 14, tw, 28);
     textoPixel('🏅 ' + ts.txt, W / 2, ty + 1, '#ffd890', 11, 'center');
@@ -1953,6 +2328,14 @@ function abrirConquistas(){
       return '<div class="conq' + (ok ? ' ok' : '') + '"><b>' + (ok ? '🏅 ' : '🔒 ') + esc(I18N.t({ pt: c.pt, en: c.en })) + '</b><span>' + esc(I18N.t({ pt: c.dpt, en: c.den })) + '</span></div>';
     }).join('') + '</div><div class="acoes"><button class="botao-pixel" data-acao="fechar">Fechar</button></div></div>');
 }
+function abrirBestiario(){
+  var B_ = PV.bestiario;
+  abrirPainel('<div class="caixa larga"><h2>BESTIÁRIO</h2><p>' + B_.total() + '/' + B_.lista.length + '</p><div class="conqs">' +
+    B_.lista.map(function(en){
+      var v = B_.viu(en.id);
+      return '<div class="conq' + (v ? ' ok' : '') + '"><b>' + (v ? esc(I18N.t({ pt: en.pt, en: en.en })) : '???') + '</b><span>' + (v ? esc(I18N.t({ pt: en.dpt, en: en.den })) : '—') + '</span></div>';
+    }).join('') + '</div><div class="acoes"><button class="botao-pixel" data-acao="fechar">Fechar</button></div></div>');
+}
 function abrirSkins(){
   var atual = PV.skins.atual().id;
   abrirPainel('<div class="caixa larga"><h2>SKINS</h2><p>Escolha seu personagem</p><div class="conqs">' +
@@ -2018,6 +2401,7 @@ document.addEventListener('click', function(ev){
   else if (a === 'ranking') abrirRanking();
   else if (a === 'conquistas') abrirConquistas();
   else if (a === 'skins') abrirSkins();
+  else if (a === 'bestiario') abrirBestiario();
   else if (a === 'skin') { if (PV.skins.usar(b.dataset.id)) abrirSkins(); }
   else if (a === 'idioma') alternarIdioma();
   else if (a === 'som') alternarSom();
