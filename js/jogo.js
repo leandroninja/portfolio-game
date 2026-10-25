@@ -246,7 +246,8 @@ M.criarEntidades = function(){
   $$('[data-etapa]').forEach(function(el){ ents.push({ tipo: 'etapa', el: el, nome: el.dataset.etapa, vivo: true }); });
   $$('[data-badge]').forEach(function(el){ ents.push({ tipo: 'badge', el: el, nome: el.dataset.badge, vivo: true }); });
   $$('[data-portal]').forEach(function(el){ ents.push({ tipo: 'portal', el: el, vivo: true }); });
-  $$('[data-segredo]').forEach(function(el){ ents.push({ tipo: 'segredo', el: el, vivo: true }); });
+  $$('[data-segredo]').forEach(function(el){ ents.push({ tipo: 'segredo', el: el, sala: el.dataset.segredo || 'badges', vivo: true }); });
+  $$('[data-alerta]').forEach(function(el){ ents.push({ tipo: 'alerta', el: el, nome: el.dataset.alerta, nomeEn: el.dataset.alertaEn, sev: el.dataset.sev || 'P2', vivo: true, ativo: false }); });
   $$('[data-bugs]').forEach(function(el){
     var n = +el.dataset.bugs || 0;
     for (var i = 0; i < n; i++) ents.push({ tipo: 'bug', el: el, u: (i + 0.5) / n, dir: i % 2 ? -1 : 1, vivo: true, vel: 50 + Math.random() * 30 });
@@ -295,7 +296,7 @@ M.posicionar = function(ents){
         e.x = cxm - span / 2 + span * t;
         e.y = pl.y - 30 * k - Math.sin(Math.PI * t) * 24 * k;
         break;
-      case 'skill': case 'etapa': case 'badge': e.x = pl.x + pl.w * (e.sx || 0.5); e.y = pl.y - 56 * k; break;
+      case 'skill': case 'etapa': case 'badge': case 'alerta': e.x = pl.x + pl.w * (e.sx || 0.5); e.y = pl.y - 56 * k; break;
       case 'trofeu': e.x = pl.x + pl.w * 0.5;  e.y = pl.y - 62 * k; break;
       case 'cafe':   e.x = pl.x + pl.w * 0.9;  e.y = pl.y - 30 * k; break;
       case 'escudo': e.x = pl.x + pl.w * 0.12; e.y = pl.y - 36 * k; break;
@@ -323,6 +324,7 @@ function novoEstado(){
     ents: [], parts: [], textos: [], aneis: [], tiros: [], bolas: [], toasts: [], reiki: 100, boss: null,
     t: 0, crono: 0, cronoOn: false, pontos: 0, bits: 0, bitsTotal: 0,
     skills: [], skillsTotal: 0, trofeus: [], trofeusTotal: 0, bugs: 0, mortes: 0,
+    inc: { on: false, feito: false, idx: 0, t: 0, resolvidos: 0, estourados: 0, soma: 0, lista: [] }, tour: null, salas: {},
     etapas: 0, etapasTotal: 0, badges: 0, badgesTotal: 0, escudo: 0, flash: 0,
     segredo: false, segredoPts: false, noBonus: false, retorno: null, salvou: false, speed: false,
     combo: 0, seqBits: 0, seqBitsT: -9, faseMax: 0, faseAtual: 0, checkpoint: 0,
@@ -414,6 +416,7 @@ function ladoDoBuraco(){
 }
 
 function controlar(dt, k){
+  if (E.tour) pilotoTour(dt, k);
   p.coyote -= dt; p.buffer -= dt;
   if (inp.ap.pulo) { inp.ap.pulo = false; p.buffer = C.buffer; }
   var dir = (inp.dir ? 1 : 0) - (inp.esq ? 1 : 0);
@@ -576,6 +579,103 @@ function renascer(){
   dizer('checkpoint: fase ' + E.checkpoint, 1.8);
 }
 
+/* ---------- tour guiado: o personagem apresenta cada fase sozinho ---------- */
+function pilotoTour(dt, k){
+  var T = E.tour;
+  p.invuln = Math.max(p.invuln, 1);
+  inp.esq = inp.dir = false;
+  if (T.fala > 0) {
+    T.fala -= dt;
+    if (T.fala <= 0) { T.texto = null; T.i++; if (T.i > M.ultima) fimTour(); }
+    return;
+  }
+  var f = M.faseDe(p.y + p.h - 2), F = M.fases[f];
+  if (!F || f > M.ultima) return;
+  if (f === T.i && !T.falou[f]) {
+    T.espera += dt;
+    var noTitulo = p.chao && F.pouso && Math.abs(p.chao.y - F.pouso.y) < 40;
+    if (noTitulo || T.espera > 12) {
+      T.falou[f] = true; T.espera = 0;
+      T.texto = PV.tour[f] || PV.tour[PV.tour.length - 1];
+      T.fala = 3.2 + I18N.t(T.texto).length / 22;
+      return;
+    }
+  }
+  var pi = M.pisos[f]; if (!pi || pi.final) return;
+  var alvo = pi.cx - p.w / 2, dx = alvo - p.x;
+  if (Math.abs(dx) > 6) { if (dx > 0) inp.dir = true; else inp.esq = true; }
+  T.dropT -= dt;
+  if (p.chao && !p.chao.solido && T.dropT <= 0) { inp.ap.baixo = true; T.dropT = 0.16; }
+}
+function fimTour(){
+  E.tour = null; limparInput(); ganhar('tour'); PV.contar('tour-fim');
+  var B = E.boss;
+  if (B && B.vivo) { B.ativo = true; B.t = 0; B.anuncio = E.t + 2; B.atk = 4; }
+  dizer('Tour concluído! Agora é com você: derrote o Bug Gigante', 6);
+}
+function cancelarTour(){
+  if (!E || !E.tour) return;
+  E.tour = null; limparInput(); dizer('você assumiu o controle', 2.5);
+}
+function quebrarTexto(txt, larg){
+  var pal = txt.split(' '), lin = [], cur = '';
+  pal.forEach(function(w){
+    var t2 = cur ? cur + ' ' + w : w;
+    if (cx.measureText(t2).width > larg && cur) { lin.push(cur); cur = w; } else cur = t2;
+  });
+  if (cur) lin.push(cur);
+  return lin;
+}
+
+/* ---------- central de incidentes: plantão com SLA ---------- */
+function slaDe(i){ return Math.max(10, 20 - i * 1.2); }
+function alertaNome(e){ return (I18N.lang === 'en' && e.nomeEn) ? e.nomeEn : e.nome; }
+function iniciarPlantao(){
+  var IN = E.inc;
+  if (IN.feito || !IN.lista.length) return;
+  IN.on = true; IN.idx = 0; IN.t = 0; IN.resolvidos = 0; IN.estourados = 0; IN.soma = 0;
+  IN.lista.forEach(function(a){ a.vivo = true; a.ativo = false; });
+  IN.lista[0].ativo = true;
+  dizer('atenda os alertas antes do SLA', 5);
+}
+function avancarPlantao(){
+  var IN = E.inc;
+  IN.lista[IN.idx].ativo = false;
+  IN.idx++; IN.t = 0;
+  if (IN.idx >= IN.lista.length) {
+    IN.on = false; IN.feito = true;
+    var mttr = IN.resolvidos ? IN.soma / IN.resolvidos : 0, tudo = IN.resolvidos === IN.lista.length;
+    banner('PLANTÃO ENCERRADO', IN.resolvidos + '/' + IN.lista.length + ' · MTTR ' + mttr.toFixed(1) + 's', 3.4, tudo ? '#34d399' : '#e0a84f');
+    som.tocar(tudo ? 'trofeu' : 'etapa'); PV.contar('plantao');
+    ganhar('plantao'); if (tudo) ganhar('incidentes');
+    return;
+  }
+  IN.lista[IN.idx].ativo = true;
+}
+function resolverAlerta(e, k){
+  var IN = E.inc; if (!IN.on || !e.ativo) return;
+  var rest = slaDe(IN.idx) - IN.t, pts = 100 + Math.round(rest * 10);
+  E.pontos += pts; IN.resolvidos++; IN.soma += IN.t;
+  som.tocar('skill'); faiscas(e.x, e.y, 20, '#34d399', k); anel(e.x, e.y, 60 * k, '#34d399');
+  texto(e.x, e.y - 18, '+' + pts, '#8dffc9', true);
+  dizer('resolvido em ' + IN.t.toFixed(1) + 's', 2);
+  e.vivo = false;
+  avancarPlantao();
+}
+function atualizarPlantao(dt){
+  var IN = E.inc;
+  if (!IN.on || !E.noBonus) return;
+  IN.t += dt;
+  if (IN.t > slaDe(IN.idx)) {
+    var e = IN.lista[IN.idx];
+    IN.estourados++; E.pontos = Math.max(0, E.pontos - 50);
+    som.tocar('dano'); tremer(4);
+    dizer('SLA estourado: ' + alertaNome(e), 2.4);
+    e.vivo = false;
+    avancarPlantao();
+  }
+}
+
 /* ---------- teleporte e sala bônus ---------- */
 function teleportar(x, y){
   p.x = x; p.y = y; p.vx = p.vy = 0; sairDoChao(); p.ignorar = null; p.invuln = Math.max(p.invuln, 1.2);
@@ -584,18 +684,21 @@ function teleportar(x, y){
   E.flash = 0.6;
   for (var i = 0; i < 28; i++) particula(x + p.w / 2, y + p.h / 2, rnd(-300, 300), rnd(-300, 300), rnd(.4, .9), i % 2 ? '#9b5cff' : '#fff', rnd(3, 7), 0);
 }
-function entrarBonus(){
-  var f = M.fases[M.fases.length - 1];
-  if (!f || !f.bonus || !f.pouso) return;
+function entrarBonus(sala){
+  var id = sala === 'incidentes' ? 'incidentes' : 'bonus';
+  var f = null;
+  M.fases.forEach(function(x){ if (x.bonus && x.el.id === id) f = x; });
+  if (!f || !f.pouso) return;
   E.retorno = { x: p.x, y: p.y }; E.noBonus = true; E.bolas = [];
-  if (!E.segredoPts) { E.segredoPts = true; E.pontos += 1000; }
-  E.segredo = true; ganhar('segredo'); som.tocar('portal');
+  if (!E.salas[id]) { E.salas[id] = true; E.pontos += 1000; }
+  E.segredo = true; ganhar('segredo'); som.tocar('portal'); PV.contar('sala-' + id);
   teleportar(f.pouso.x + f.pouso.w * 0.3, f.pouso.y - p.h - 4);
-  banner('SALA SECRETA', 'SALA DE SERVIDORES', 2.4, '#9b5cff');
-  dizer('saia pelo portal SAÍDA', 6);
+  if (id === 'incidentes') { banner('CENTRAL DE INCIDENTES', 'plantão iniciado', 2.4, '#ff4d7e'); iniciarPlantao(); }
+  else { banner('SALA SECRETA', 'SALA DE SERVIDORES', 2.4, '#9b5cff'); dizer('saia pelo portal SAÍDA', 6); }
 }
 function sairBonus(){
   E.noBonus = false; som.tocar('portal');
+  if (E.inc.on) { E.inc.on = false; E.inc.lista.forEach(function(a){ a.ativo = false; }); }
   var r = E.retorno || { x: 60, y: 0 };
   teleportar(r.x, r.y);
 }
@@ -761,6 +864,7 @@ function matarInimigo(e, k){
   if (mult >= 3) dizer('COMBO x' + mult + '!', 1.2);
   if (E.combo >= 5) ganhar('combo5');
   if (p.dashT > 0) ganhar('dash');
+  if (e.tipo === 'fatura') ganhar('finops');
 }
 
 /* dano em inimigo: alguns têm mais de 1 de vida (a fatura de cloud tem 3) */
@@ -816,7 +920,8 @@ function coletar(e, k){
       faiscas(e.x, e.y, 16, '#35d0e5', k); texto(e.x, e.y - 14, '+ ' + e.nome, '#c9f6fc', true);
       if (E.badges >= E.badgesTotal) { banner('SELOS', E.badges + '/' + E.badgesTotal, 2.2, '#35d0e5'); ganhar('badges'); }
       break;
-    case 'segredo': entrarBonus(); break;
+    case 'segredo': entrarBonus(e.sala); break;
+    case 'alerta': e.vivo = true; resolverAlerta(e, k); break;
     case 'portal': sairBonus(); break;
   }
 }
@@ -839,6 +944,8 @@ function colisoes(k){
         }
       }
     } else {
+      if (E.tour && (e.tipo === 'segredo' || e.tipo === 'portal' || e.tipo === 'alerta')) continue;
+      if (e.tipo === 'alerta' && !e.ativo) continue;
       var r = (e.tipo === 'bit' ? 16 : 26) * k;
       if (e.x > x0 - r && e.x < x1 + r && e.y > y0 - r && e.y < y1 + r) coletar(e, k);
     }
@@ -853,14 +960,14 @@ function acompanharFase(){
   for (var q = 1; q <= f; q++) M.fases[q].el.classList.add('fase-ativa');
   som.tocar('fase');
   banner('FASE ' + f, M.fases[f].nome.toUpperCase(), 2.2);
-  if (f === M.ultima && !E.terminou) {
+  if (f === M.ultima && !E.terminou && !E.tour) {
     if (E.boss && E.boss.vivo) { E.boss.ativo = true; E.boss.t = 0; E.boss.anuncio = E.t + 2.4; E.boss.atk = 4; dizer('derrote o Bug Gigante: Rei Gun carregado, soco ou pisão', 6); }
     else E.fimEm = E.t + 3;
   }
 }
 
 function tutorial(){
-  if (E.speed || E.faseMax > 0) return;
+  if (E.speed || E.tour || E.faseMax > 0) return;
   if (!E.tut.andou) dizer('← → andam · espaço pula', 9999);
   else if (!E.tut.pulou2 && E.t < 12) dizer('espaço de novo no ar: pulo duplo', 9999);
   else if (!E.tut.atirou && E.t > 5 && E.t < 25) dizer('X: Rei Gun · segure para carregar, solte para atirar', 9999);
@@ -907,6 +1014,7 @@ function passo(dt){
     atualizarTiros(dt, k);
     atualizarBoss(dt, k);
     atualizarBolas(dt, k);
+    atualizarPlantao(dt);
     colisoes(k);
     E.reiki = Math.min(100, E.reiki + (p.mirando ? 0 : 18) * dt);
     if (p.poseT > 0) p.poseT -= dt;
@@ -1022,15 +1130,23 @@ function desenharEntidades(topo, base){
         cx.fillStyle = '#fff'; cx.font = '700 ' + 9 * (s / 3) + 'px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
         cx.fillText(tr('SAÍDA'), e.x, e.y - ph2 / 2 - 10);
         break; }
+      case 'alerta': {
+        if (!e.ativo) break;
+        var IN = E.inc, rest = clamp(1 - IN.t / slaDe(IN.idx), 0, 1), pul = 0.5 + 0.5 * Math.sin(t * 10), abz = Math.sin(t * 3) * 4;
+        cx.strokeStyle = 'rgba(255,77,126,' + (0.45 + 0.4 * pul) + ')'; cx.lineWidth = 4;
+        cx.beginPath(); cx.arc(e.x, e.y + abz, 40 * (s / 3), -Math.PI / 2, -Math.PI / 2 + rest * Math.PI * 2); cx.stroke();
+        chip(e.x, e.y, '⚠ ' + e.sev + ' ' + alertaNome(e), '#ff4d7e', 'rgba(255,77,126,' + (0.18 + 0.22 * pul) + ')', s, abz);
+        break; }
       case 'segredo': {
+        var rojo = e.sala === 'incidentes', cor1 = rojo ? '255,77,126' : '224,168,79', cor2 = rojo ? '#ff4d7e' : '#e0a84f';
         var bz = Math.sin(t * 3) * 5, sz = 34 * (s / 3);
         var gs = cx.createRadialGradient(e.x, e.y + bz, 0, e.x, e.y + bz, sz * 1.8);
-        gs.addColorStop(0, 'rgba(224,168,79,.45)'); gs.addColorStop(1, 'rgba(224,168,79,0)');
+        gs.addColorStop(0, 'rgba(' + cor1 + ',.45)'); gs.addColorStop(1, 'rgba(' + cor1 + ',0)');
         cx.fillStyle = gs; cx.beginPath(); cx.arc(e.x, e.y + bz, sz * 1.8, 0, 7); cx.fill();
-        cx.fillStyle = '#e0a84f'; cx.fillRect(e.x - sz / 2, e.y + bz - sz / 2, sz, sz);
-        cx.strokeStyle = '#7a4f1a'; cx.lineWidth = 3; cx.strokeRect(e.x - sz / 2, e.y + bz - sz / 2, sz, sz);
+        cx.fillStyle = cor2; cx.fillRect(e.x - sz / 2, e.y + bz - sz / 2, sz, sz);
+        cx.strokeStyle = rojo ? '#7a1830' : '#7a4f1a'; cx.lineWidth = 3; cx.strokeRect(e.x - sz / 2, e.y + bz - sz / 2, sz, sz);
         cx.fillStyle = '#fff0c4'; cx.font = '700 ' + 22 * (s / 3) + 'px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
-        cx.fillText('?', e.x, e.y + bz + 2); break; }
+        cx.fillText(rojo ? '!' : '?', e.x, e.y + bz + 2); break; }
       case 'bug': {
         cx.save(); cx.translate(e.x + e.w / 2, e.y + e.h / 2); cx.scale(e.dir, 1); cx.translate(-e.w / 2, -e.h / 2);
         mapa(BUG, 0, Math.sin(t * 12) > 0 ? 0 : -1, s); cx.restore(); break; }
@@ -1143,7 +1259,7 @@ function desenharHUD(){
   if (E.flash > 0) { cx.fillStyle = 'rgba(255,255,255,' + E.flash * 0.7 + ')'; cx.fillRect(0, 0, W, H); }
   for (i = 0; i < 3; i++) mapa(CORACAO, x0 + i * 28, y0 - 9, s, i < p.vidas ? null : { H: '#24364b' });
   var x = x0 + 100;
-  var nomeFase = E.faseAtual > M.ultima ? 'SALA SECRETA' : 'FASE ' + E.faseAtual + '/' + M.ultima + ' · ' + M.fases[E.faseAtual].nome.toUpperCase();
+  var nomeFase = E.faseAtual > M.ultima ? M.fases[E.faseAtual].nome.toUpperCase() : 'FASE ' + E.faseAtual + '/' + M.ultima + ' · ' + M.fases[E.faseAtual].nome.toUpperCase();
   if (compacto) {
     var y1 = y0 + 22;
     mapa(BIT, x, y0 - 8, 3); textoPixel(E.bits + '/' + E.bitsTotal, x + 22, y0, '#c9f6fc', 12);
@@ -1152,7 +1268,7 @@ function desenharHUD(){
     textoPixel('★ ' + E.skills.length + '/' + E.skillsTotal, x0 + 84, y1, '#ffd890', 11);
     textoPixel('🏆 ' + E.trofeus.length + '/' + E.trofeusTotal, x0 + 154, y1, '#e0a84f', 11);
     if (E.escudo > 0) textoPixel('⬢', x0 + 220, y1, '#d2b4ff', 12);
-    textoPixel(E.faseAtual > M.ultima ? 'SALA SECRETA' : 'FASE ' + E.faseAtual + '/' + M.ultima, W - 12, y1, E.faseAtual > M.ultima ? '#c9a8ff' : '#6a8294', 11, 'right');
+    textoPixel(E.faseAtual > M.ultima ? (M.fases[E.faseAtual].el.dataset.curto || 'BÔNUS') : 'FASE ' + E.faseAtual + '/' + M.ultima, W - 12, y1, E.faseAtual > M.ultima ? '#c9a8ff' : '#6a8294', 11, 'right');
   } else {
     mapa(BIT, x, y0 - 8, 3); textoPixel(E.bits + '/' + E.bitsTotal, x + 22, y0, '#c9f6fc', 13);
     x += 100; textoPixel('★ ' + E.skills.length + '/' + E.skillsTotal, x, y0, '#ffd890', 13);
@@ -1177,6 +1293,30 @@ function desenharHUD(){
     cx.fillStyle = BB.fase2 ? '#ff2d55' : '#ff4d7e'; cx.fillRect(bx0, byy, bw * Math.max(0, BB.hp) / BB.hpMax, 10);
     cx.strokeStyle = '#fff'; cx.lineWidth = 1; cx.strokeRect(bx0, byy, bw, 10);
     textoPixel('BUG GIGANTE', W / 2, byy - 10, '#ff8fae', 11, 'center');
+  }
+  var IN2 = E.inc;
+  if (IN2 && IN2.on && E.noBonus && IN2.lista[IN2.idx]) {
+    var al3 = IN2.lista[IN2.idx], sla3 = slaDe(IN2.idx), pr = clamp(1 - IN2.t / sla3, 0, 1);
+    var iw = Math.min(320, W - 40), ix0 = W / 2 - iw / 2, iy = compacto ? y0 + 70 : y0 + 22;
+    cx.fillStyle = '#2a0f1c'; cx.fillRect(ix0, iy, iw, 10);
+    cx.fillStyle = pr < 0.3 ? '#ff2d55' : '#e0a84f'; cx.fillRect(ix0, iy, iw * pr, 10);
+    cx.strokeStyle = '#fff'; cx.lineWidth = 1; cx.strokeRect(ix0, iy, iw, 10);
+    textoPixel('INCIDENTE ' + (IN2.idx + 1) + '/' + IN2.lista.length + ' · ' + al3.sev + ' ' + alertaNome(al3) + ' · ' + Math.max(0, sla3 - IN2.t).toFixed(1) + 's', W / 2, iy - 10, '#ff8fae', 11, 'center');
+    var syv = window.scrollY;
+    if (al3.y < syv + 110) textoPixel('▲', clamp(al3.x, 20, W - 20), y0 + 96, '#ff4d7e', 22, 'center');
+    else if (al3.y > syv + H - 110) textoPixel('▼', clamp(al3.x, 20, W - 20), H - (TOQUE ? 130 : 60), '#ff4d7e', 22, 'center');
+  }
+  var TB = E.tour;
+  if (TB && TB.texto) {
+    var txb = I18N.t(TB.texto), bw2 = Math.min(580, W - 24);
+    cx.font = '600 ' + (compacto ? 13 : 15) + 'px Archivo, sans-serif'; cx.textAlign = 'left'; cx.textBaseline = 'middle';
+    var lns = quebrarTexto(txb, bw2 - 32), lh2 = compacto ? 18 : 21, bh = lns.length * lh2 + 38;
+    var bx2 = W / 2 - bw2 / 2, by3 = H - bh - (TOQUE ? 96 : 40);
+    cx.fillStyle = 'rgba(11,24,40,.95)'; cx.fillRect(bx2, by3, bw2, bh);
+    cx.strokeStyle = '#35d0e5'; cx.lineWidth = 2; cx.strokeRect(bx2, by3, bw2, bh);
+    textoPixel('LEANDRO', bx2 + 14, by3 + 14, '#35d0e5', 10);
+    cx.font = '600 ' + (compacto ? 13 : 15) + 'px Archivo, sans-serif'; cx.fillStyle = '#eaf1f5'; cx.textAlign = 'left'; cx.textBaseline = 'middle';
+    lns.forEach(function(l, n){ cx.fillText(l, bx2 + 16, by3 + 34 + n * lh2); });
   }
   for (i = 0; i < E.toasts.length; i++) {
     var ts = E.toasts[i], al = Math.min(1, ts.t * 4, (3.6 - ts.t) * 2);
@@ -1382,7 +1522,7 @@ function aplicarIdioma(){
   M.medir();
   if (modo !== 'menu') remedir();
 }
-function alternarIdioma(){ I18N.set(I18N.lang === 'en' ? 'pt' : 'en'); aplicarIdioma(); }
+function alternarIdioma(){ I18N.set(I18N.lang === 'en' ? 'pt' : 'en'); aplicarIdioma(); PV.contar('idioma-' + I18N.lang); }
 
 function alternarSom(){
   var on = som.alternar(), b = $('#btnSom');
@@ -1402,11 +1542,13 @@ function rotulos(){ $$('.rotulo-jogar').forEach(function(el){ el.textContent = t
 function novaPartida(tipo){
   E = novoEstado();
   E.speed = tipo === 'speed';
+  E.tour = tipo === 'tour' ? { i: 0, fala: 0, falou: {}, dropT: 0, espera: 0, texto: null } : null;
   M.medir();
   ajustarTamanho();
   E.ents = M.criarEntidades();
   M.posicionar(E.ents);
   E.boss = criarBoss();
+  E.inc.lista = E.ents.filter(function(e){ return e.tipo === 'alerta'; });
   E.ents.forEach(function(e){
     if (e.oculto) return;
     if (e.tipo === 'bit') E.bitsTotal++;
@@ -1434,6 +1576,8 @@ function jogar(tipo){
   if (TOQUE && window.innerHeight > window.innerWidth) banner('GIRE O CELULAR', 'para jogar melhor', 3.2, '#e0a84f');
   else banner('FASE 0', 'INÍCIO', 2, '#35d0e5');
   if (E.speed) dizer('SPEEDRUN: derrote o Bug Gigante o mais rápido possível', 4);
+  if (E.tour) banner('TOUR GUIADO', 'toque ou aperte uma tecla para assumir o controle', 3.2, '#35d0e5');
+  PV.contar('jogar-' + tipoPartida);
   rotulos();
   som.musica.iniciar('normal');
 }
@@ -1505,7 +1649,7 @@ function painelFim(){
 }
 function terminar(){
   E.terminou = true; modo = 'fim'; limparInput(); som.tocar('trofeu'); som.musica.parar();
-  ganhar('zerou');
+  ganhar('zerou'); PV.contar('fim-de-jogo');
   if (E.mortes === 0) ganhar('sem_morrer');
   if (E.speed && E.crono < 300) ganhar('speedrun');
   painelFim();
@@ -1569,10 +1713,13 @@ function termEnviar(){
 
 /* ---------- eventos ---------- */
 document.addEventListener('click', function(ev){
+  var cv = ev.target.closest('[data-cv]');
+  if (cv) { PV.contar('curriculo-' + cv.dataset.cv); PV.conquistas.desbloquear('curriculo'); return; }
   var b = ev.target.closest('[data-acao]'); if (!b) return;
   var a = b.dataset.acao;
   if (a === 'jogar') jogar('normal');
   else if (a === 'speedrun') jogar('speed');
+  else if (a === 'tour') jogar('tour');
   else if (a === 'continuar') continuar();
   else if (a === 'sair') sair();
   else if (a === 'explorar') { fecharPainel(); modo = 'jogando'; som.musica.iniciar('normal'); }
@@ -1603,7 +1750,7 @@ addEventListener('keydown', function(e){
     if (e.code === 'Enter' && painel.hidden && !e.target.closest('a,button,input')) { e.preventDefault(); jogar('normal'); }
     return;
   }
-  if (TECLAS[e.code]) { e.preventDefault(); if (!e.repeat || TECLAS[e.code] !== 'pulo') apertar(TECLAS[e.code]); }
+  if (TECLAS[e.code]) { cancelarTour(); e.preventDefault(); if (!e.repeat || TECLAS[e.code] !== 'pulo') apertar(TECLAS[e.code]); }
   if (e.code === 'KeyP' || e.code === 'Escape') { e.preventDefault(); modo === 'pausado' ? continuar() : pausar(); }
   if (e.code === 'Enter' && modo === 'pausado') continuar();
   if (e.code === 'KeyM') alternarSom();
@@ -1615,7 +1762,7 @@ document.addEventListener('visibilitychange', function(){ if (document.hidden &&
 
 $$('#pad button').forEach(function(b){
   var a = b.dataset.k;
-  b.addEventListener('pointerdown', function(e){ e.preventDefault(); if (modo === 'jogando') apertar(a); });
+  b.addEventListener('pointerdown', function(e){ e.preventDefault(); if (modo === 'jogando') { cancelarTour(); apertar(a); } });
   ['pointerup', 'pointerleave', 'pointercancel'].forEach(function(n){ b.addEventListener(n, function(){ soltar(a); }); });
 });
 
@@ -1663,7 +1810,7 @@ addEventListener('resize', function(){ redimensionarCanvas(); if (modo !== 'menu
       setTimeout(function(){ el.classList.remove('rev', 'dentro'); }, 900);
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-  $$('.rotulo, .cartao, .heroi-texto, .heroi-acoes, .heroi-extras, .controles, .lead, .nota, .codigo, .contatos, .rack').forEach(function(el){ el.classList.add('rev'); obs.observe(el); });
+  $$('.rotulo, .cartao, .heroi-texto, .heroi-acoes, .heroi-extras, .controles, .lead, .nota, .codigo, .contatos, .rack, .console').forEach(function(el){ el.classList.add('rev'); obs.observe(el); });
 })();
 
 /* ---------- terminal secreto por toque ---------- */

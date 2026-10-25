@@ -7,11 +7,23 @@
 <meta name="description" content="Portfólio de Leandro Oliveira Moraes, Arquiteto Sênior DevOps & Multi-Cloud, feito como um jogo de plataforma em canvas.">
 <meta name="theme-color" content="#060b14">
 <link rel="canonical" href="https://leandroninja.github.io/portfolio-game/">
+<link rel="icon" type="image/svg+xml" href="img/icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="img/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/icon-180.png">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://leandroninja.github.io/portfolio-game/">
 <meta property="og:title" content="Leandro Oliveira Moraes · Arquiteto DevOps &amp; Multi-Cloud">
 <meta property="og:description" content="Portfólio feito como um jogo de plataforma. Azure, AWS, GCP, Terraform, Kubernetes, Databricks e DevSecOps. Aperte Jogar!">
-<meta name="twitter:card" content="summary">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:image" content="https://leandroninja.github.io/portfolio-game/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Leandro Oliveira Moraes, Arquiteto Sênior DevOps e Multi-Cloud. Portfólio em formato de jogo.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://leandroninja.github.io/portfolio-game/img/og.png">
+<!-- contador de visitas (GoatCounter, sem cookies): escreva o código da conta no content abaixo para ativar -->
+<meta name="goatcounter" content="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@700&family=Archivo:wght@400;500;600;700;800&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
@@ -50,8 +62,11 @@
     <div class="heroi-acoes">
       <button class="botao-pixel" type="button" data-acao="jogar"><span class="rotulo-jogar">▶ Jogar</span> <kbd>Enter</kbd></button>
       <a class="botao-linha" href="#perfil" data-en="Just let me read ↓">Só quero ler ↓</a>
+      <a class="botao-linha" data-cv="pt" href="curriculo/Leandro-Oliveira-Moraes-Curriculo-PT.pdf" download>📄 Currículo (PDF)</a>
+      <a class="botao-linha" data-cv="en" href="curriculo/Leandro-Oliveira-Moraes-Resume-EN.pdf" download>📄 Résumé (PDF · EN)</a>
     </div>
     <div class="heroi-extras">
+      <button class="botao-linha" type="button" data-acao="tour" data-en="🎬 Guided tour">🎬 Tour guiado</button>
       <button class="botao-linha" type="button" data-acao="speedrun" data-en="⏱ Speedrun">⏱ Speedrun</button>
       <button class="botao-linha" type="button" data-acao="conquistas" data-en="🏅 Achievements">🏅 Conquistas</button>
       <button class="botao-linha" type="button" data-acao="skins" data-en="🎭 Skins">🎭 Skins</button>
@@ -210,7 +225,7 @@
 <section class="fase" id="pipeline" data-fase="5" data-nome="Pipeline">
   <p class="rotulo" data-en="LEVEL 5 · PIPELINE">FASE 5 · PIPELINE</p>
   <h2 class="titulo-fase" data-plat data-pouso data-letras>PIPELINE</h2>
-  <p class="lead" data-plat data-en="Pass through every stage and turn the pipeline green.">Passe por todas as etapas e deixe o pipeline verde.</p>
+  <p class="lead" data-plat data-segredo="incidentes" data-en="Pass through every stage and turn the pipeline green.">Passe por todas as etapas e deixe o pipeline verde.</p>
   <div class="grade g4 etapas">
     <article class="cartao etapa" data-plat data-etapa="BUILD" data-bugs="1"><span class="data" data-en="STAGE 1">ETAPA 1</span><h3>BUILD</h3><p data-en="Build, container lint and secret detection (Gitleaks, Hadolint).">Build, lint de container e detecção de segredos (Gitleaks, Hadolint).</p></article>
     <article class="cartao etapa" data-plat data-etapa="TEST" data-mob="crash"><span class="data" data-en="STAGE 2">ETAPA 2</span><h3>TEST</h3><p data-en="Tests and static analysis (SonarQube, Bandit) with a quality gate.">Testes e análise estática (SonarQube, Bandit) com quality gate.</p></article>
@@ -262,12 +277,14 @@
     <a class="botao-linha" data-plat href="https://linkedin.com/in/leandro-oliveira-26b14768" target="_blank" rel="noopener">LinkedIn</a>
     <a class="botao-linha" data-plat href="https://github.com/leandroninja" target="_blank" rel="noopener">GitHub</a>
     <a class="botao-linha" data-plat href="tel:+5581996377099">(81) 99637-7099</a>
+    <a class="botao-linha" data-plat data-cv="pt" href="curriculo/Leandro-Oliveira-Moraes-Curriculo-PT.pdf" download>📄 Currículo (PDF)</a>
+    <a class="botao-linha" data-plat data-cv="en" href="curriculo/Leandro-Oliveira-Moraes-Resume-EN.pdf" download>📄 Résumé (PDF · EN)</a>
   </div>
   <p class="rodape" data-en="© 2026 Leandro Oliveira Moraes · hint: press ` to open a secret terminal">© 2026 Leandro Oliveira Moraes · dica: aperte ` para abrir um terminal secreto</p>
 </section>
 
 <!-- ============ FASE 9 · SALA SECRETA (bônus) ============ -->
-<section class="fase bonus" id="bonus" data-fase="9" data-bonus data-nome="Sala secreta">
+<section class="fase bonus" id="bonus" data-fase="9" data-bonus data-curto="SALA SECRETA" data-nome="Sala secreta">
   <p class="rotulo" data-en="SECRET ROOM · BADGES">SALA SECRETA · BADGES</p>
   <h2 class="titulo-fase" data-plat data-pouso data-letras data-en="SERVER ROOM">SERVIDORES</h2>
   <p class="lead" data-plat data-en="50+ badges earned. Grab the seals on top of each rack and take the exit portal.">Mais de 50 badges conquistados. Pegue os selos no topo de cada rack e saia pelo portal.</p>
@@ -285,6 +302,22 @@
   </div>
 </section>
 
+<!-- ============ FASE 10 · CENTRAL DE INCIDENTES (bônus) ============ -->
+<section class="fase bonus" id="incidentes" data-fase="10" data-bonus data-curto="INCIDENTES" data-nome="Central de incidentes">
+  <p class="rotulo" data-en="SECRET ROOM · ON-CALL">SALA SECRETA · PLANTÃO</p>
+  <h2 class="titulo-fase" data-plat data-pouso data-letras data-en="INCIDENTS">INCIDENTES</h2>
+  <p class="lead" data-plat data-en="On-call shift: answer each flashing alert before its SLA runs out. Touch the alert to resolve it.">Plantão: atenda cada alerta piscando antes que o SLA acabe. Encoste no alerta para resolvê-lo.</p>
+  <div class="consoles">
+    <div class="console" style="height:150px" data-plat data-alerta="CPU 98%" data-alerta-en="CPU 98%" data-sev="P1"><span>web-prod-03</span><em>CPU 98%</em></div>
+    <div class="console" style="height:230px" data-plat data-alerta="Disco cheio" data-alerta-en="Disk full" data-sev="P2" data-bits="2"><span>db-prod-01</span><em data-en="Disk 100%">Disco 100%</em></div>
+    <div class="console" style="height:110px" data-plat data-alerta="Pod CrashLoop" data-alerta-en="Pod CrashLoop" data-sev="P1"><span>aks-cluster</span><em>CrashLoop</em></div>
+    <div class="console" style="height:290px" data-plat data-alerta="Certificado expira" data-alerta-en="Cert expiring" data-sev="P3" data-bits="2"><span>api-gateway</span><em data-en="Cert 2d">Cert 2d</em></div>
+    <div class="console" style="height:180px" data-plat data-alerta="Segredo vazado" data-alerta-en="Secret leaked" data-sev="P1"><span>repo-infra</span><em data-en="Key in git">Chave no git</em></div>
+    <div class="console" style="height:130px" data-plat data-alerta="Latência p99" data-alerta-en="p99 latency" data-sev="P2" data-bits="2"><span>checkout-svc</span><em>p99 4.2s</em></div>
+    <div class="console saida" style="height:100px" data-plat data-portal><span data-en="EXIT">SAÍDA</span><em>↩</em></div>
+  </div>
+</section>
+
 </main>
 
 <div id="painel" class="painel" hidden></div>
@@ -293,6 +326,7 @@
   <div><button data-k="dash">»</button><button data-k="tiro">⚡</button><button data-k="baixo">▼</button><button data-k="pulo">▲</button></div>
 </div>
 
+<script>(function(){var c=document.querySelector('meta[name="goatcounter"]').content;if(!c||location.protocol==="file:"||/^(localhost|127\.)/.test(location.hostname))return;var s=document.createElement("script");s.async=true;s.dataset.goatcounter="https://"+c+".goatcounter.com/count";s.src="https://gc.zgo.at/count.js";document.head.appendChild(s)})()</script>
 <script src="js/som.js"></script>
 <script src="js/dados.js"></script>
 <script src="js/jogo.js"></script>

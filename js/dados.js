@@ -45,6 +45,10 @@ PV.i18n = (function(){
     ['PIPELINE VERDE', 'GREEN PIPELINE'], ['todas as etapas passaram', 'all stages passed'],
     ['SALA DE SERVIDORES', 'SERVER ROOM'], ['saia pelo portal SAÍDA', 'leave through the EXIT portal'], ['SAÍDA', 'EXIT'],
     ['GIRE O CELULAR', 'ROTATE YOUR PHONE'], ['para jogar melhor', 'for a better experience'],
+    ['CENTRAL DE INCIDENTES', 'INCIDENT CENTER'], ['INCIDENTE ', 'INCIDENT '], ['SLA estourado: ', 'SLA breached: '],
+    ['PLANTÃO ENCERRADO', 'ON-CALL ENDED'], ['plantão iniciado', 'on-call started'], ['atenda os alertas antes do SLA', 'answer the alerts before the SLA'],
+    ['resolvido em ', 'resolved in '], ['TOUR GUIADO', 'GUIDED TOUR'], ['toque ou aperte uma tecla para assumir o controle', 'tap or press a key to take control'],
+    ['você assumiu o controle', 'you took control'], ['Tour concluído! Agora é com você: derrote o Bug Gigante', 'Tour complete! Now it is your turn: defeat the Giant Bug'],
     ['sem pausa no speedrun', 'no pausing in speedrun'], ['sem terminal no speedrun', 'no terminal in speedrun']
   ].sort(function(a, b){ return b[0].length - a[0].length; });
 
@@ -83,6 +87,11 @@ PV.conquistas = (function(){
     { id: 'terminal', pt: 'Hacker de terminal', en: 'Terminal hacker', dpt: 'Use o terminal secreto (tecla `).', den: 'Use the secret terminal (` key).' },
     { id: 'zerou', pt: 'Zerou o jogo', en: 'Beat the game', dpt: 'Chegue ao fim do jogo.', den: 'Reach the end of the game.' },
     { id: 'sem_morrer', pt: 'Zerou sem morrer', en: 'No-death run', dpt: 'Termine o jogo sem morrer nenhuma vez.', den: 'Finish the game without dying.' },
+    { id: 'plantao', pt: 'Plantonista', en: 'On-call engineer', dpt: 'Termine o plantão na Central de Incidentes.', den: 'Finish the shift in the Incident Center.' },
+    { id: 'incidentes', pt: 'Plantão perfeito', en: 'Perfect on-call', dpt: 'Resolva os 6 alertas dentro do SLA.', den: 'Resolve all 6 alerts within the SLA.' },
+    { id: 'finops', pt: 'FinOps em ação', en: 'FinOps in action', dpt: 'Derrote a fatura de cloud.', den: 'Defeat the cloud bill.' },
+    { id: 'tour', pt: 'Turista', en: 'Tourist', dpt: 'Assista ao tour guiado até o fim.', den: 'Watch the guided tour to the end.' },
+    { id: 'curriculo', pt: 'Recrutador atento', en: 'Attentive recruiter', dpt: 'Baixe o currículo em PDF.', den: 'Download the résumé PDF.' },
     { id: 'speedrun', pt: 'Velocista', en: 'Speedrunner', dpt: 'Termine o speedrun em menos de 5 minutos.', den: 'Finish the speedrun in under 5 minutes.' }
   ];
   var tem = {};
@@ -109,7 +118,15 @@ PV.skins = (function(){
     { id: 'professor', pt: 'Professor', en: 'Professor', req: 'zerou', oculos: true,
       pal: { B: '#7b8394', b: '#5a6170', L: '#c2265a', J: '#2a2f3b', D: '#4a4f5c' } },
     { id: 'devops', pt: 'DevOps (capuz)', en: 'DevOps (hoodie)', req: 'pipeline', oculos: false,
-      pal: { D: '#1e293b', B: '#243044', b: '#141b2b', L: '#35d0e5', J: '#0f172a' } }
+      pal: { D: '#1e293b', B: '#243044', b: '#141b2b', L: '#35d0e5', J: '#0f172a' } },
+    { id: 'sre', pt: 'Plantonista SRE', en: 'SRE on-call', req: 'incidentes', oculos: false,
+      pal: { B: '#8a1f2d', b: '#5c1420', L: '#ffcc00', J: '#222a3a', D: '#1a1a22' } },
+    { id: 'cloud', pt: 'Arquiteto Cloud', en: 'Cloud architect', req: 'colecionador', oculos: true,
+      pal: { B: '#e8eef7', b: '#aab8cf', L: '#1f6feb', J: '#34476f', D: '#2a2018' } },
+    { id: 'espirito', pt: 'Espírito verde', en: 'Green spirit', req: 'tiro', oculos: false,
+      pal: { B: '#2f9e44', b: '#1f6b2e', L: '#ffffff', J: '#1b2b4a', D: '#0b0b10' } },
+    { id: 'dourado', pt: 'Campeão dourado', en: 'Golden champion', req: 'sem_morrer', oculos: false,
+      pal: { B: '#e0a84f', b: '#a8741f', L: '#fff0c4', J: '#5a3d12', D: '#2a2018' } }
   ];
   var atual = 'padrao';
   try { atual = localStorage.getItem('pv-skin') || 'padrao'; } catch (e) {}
@@ -185,3 +202,21 @@ PV.terminal = (function(){
   }
   return { run: run, ajuda: function(lang){ return AJUDA[lang] || AJUDA.pt; } };
 })();
+
+/* ---------- tour guiado: fala de cada fase ---------- */
+PV.tour = [
+  { pt: 'Oi! Eu sou o Leandro, Arquiteto Sênior DevOps e Multi-Cloud. Vou te mostrar meu portfólio. Pode soltar o controle!', en: 'Hi! I am Leandro, a Senior DevOps & Multi-Cloud Architect. Let me show you my portfolio. Sit back!' },
+  { pt: 'Mais de 8 anos em infraestrutura crítica, 5 clouds e mais de 30 certificações. Hoje lidero a infraestrutura da plataforma de dados na VR Benefícios.', en: '8+ years in mission-critical infrastructure, 5 clouds and 30+ certifications. Today I lead the data platform infrastructure at VR Benefícios.' },
+  { pt: 'No dia a dia: Azure, AWS, GCP, Terraform, Kubernetes, Databricks, DevSecOps e FinOps.', en: 'Day to day: Azure, AWS, GCP, Terraform, Kubernetes, Databricks, DevSecOps and FinOps.' },
+  { pt: 'Comecei na docência e na coordenação de TI, passei pela Accenture e hoje atuo na VR Benefícios, além de lecionar na pós-graduação da Faculdade ESUDA.', en: 'I started in teaching and IT coordination, went through Accenture and now work at VR Benefícios, besides teaching postgraduate courses at Faculdade ESUDA.' },
+  { pt: 'Nove projetos no GitHub: plataformas multi-cloud, DevSecOps, Databricks, FinOps e observabilidade com OpenTelemetry.', en: 'Nine projects on GitHub: multi-cloud platforms, DevSecOps, Databricks, FinOps and observability with OpenTelemetry.' },
+  { pt: 'Um pipeline com segurança em cada etapa: build, test, scan e deploy.', en: 'A pipeline with security at every stage: build, test, scan and deploy.' },
+  { pt: 'Microsoft, Databricks, AWS, Linux Foundation, Fortinet, OCI e Intel, com mais de 50 badges.', en: 'Microsoft, Databricks, AWS, Linux Foundation, Fortinet, OCI and Intel, with 50+ badges.' },
+  { pt: 'Bacharel em Sistemas de Informação, MBA em Big Data, especializações em IA e Segurança da Informação e mestrado em andamento.', en: "Bachelor's in Information Systems, MBA in Big Data, specializations in AI and Information Security, and a master's in progress." },
+  { pt: 'Foi um prazer! Fale comigo por e-mail, LinkedIn ou GitHub, ou baixe meu currículo. Agora é com você!', en: 'It was a pleasure! Reach me by email, LinkedIn or GitHub, or download my résumé. Now it is your turn!' }
+];
+
+/* ---------- contador de eventos (só funciona se o GoatCounter estiver ativo) ---------- */
+PV.contar = function(nome){
+  try { var g = window.goatcounter; if (g && g.count) g.count({ path: 'evento/' + nome, title: nome, event: true }); } catch (e) {}
+};
