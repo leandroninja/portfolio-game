@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Leandro Oliveira Moraes, portfólio</title>
+<meta name="description" content="Portfólio de Leandro Oliveira Moraes, Arquiteto Sênior DevOps & Multi-Cloud, feito como um jogo de plataforma em canvas.">
+<meta name="theme-color" content="#060b14">
+<link rel="canonical" href="https://leandroninja.github.io/portfolio-game/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://leandroninja.github.io/portfolio-game/">
+<meta property="og:title" content="Leandro Oliveira Moraes · Arquiteto DevOps &amp; Multi-Cloud">
+<meta property="og:description" content="Portfólio feito como um jogo de plataforma. Azure, AWS, GCP, Terraform, Kubernetes, Databricks e DevSecOps. Aperte Jogar!">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@700&family=Archivo:wght@400;500;600;700;800&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<canvas id="fundo" aria-hidden="true"></canvas>
+<canvas id="jogo" aria-hidden="true"></canvas>
+
+<header class="nav" id="nav">
+  <a href="#topo" class="marca">LEANDRO<i>.</i>MORAES</a>
+  <nav class="nav-links" aria-label="Seções">
+    <a href="#perfil" data-en="Profile">Perfil</a><a href="#atuacao" data-en="Expertise">Atuação</a><a href="#trajetoria" data-en="Career">Trajetória</a>
+    <a href="#projetos" data-en="Projects">Projetos</a><a href="#pipeline">Pipeline</a><a href="#certificacoes" data-en="Certifications">Certificações</a>
+    <a href="#formacao" data-en="Education">Formação</a><a href="#contato" data-en="Contact">Contato</a>
+  </nav>
+  <button class="mini-btn" type="button" id="btnIdioma" data-acao="idioma" title="Language / Idioma">EN</button>
+  <button class="mini-btn" type="button" id="btnSom" data-acao="som" title="Som / Sound">♪</button>
+  <button class="botao-pixel mini" type="button" data-acao="jogar"><span class="rotulo-jogar">▶ Jogar</span></button>
+  <div class="progresso" id="progresso"></div>
+</header>
+
+<main id="mundo">
+
+<!-- ============ FASE 0 · INÍCIO ============ -->
+<section class="fase heroi" id="topo" data-fase="0" data-nome="Início">
+  <div class="heroi-grade">
+    <h1 class="titulo" aria-label="Leandro Moraes">
+      <span class="linha" data-plat data-pouso data-letras>LEANDRO</span>
+      <span class="linha ciano" data-plat data-letras data-bits="5">MORAES</span>
+    </h1>
+    <div class="heroi-texto" data-plat>
+      <p class="cargo" data-en="Senior DevOps &amp; Multi-Cloud Architect. 8+ years in mission-critical infrastructure across Azure, AWS, GCP, Oracle Cloud and IBM Cloud.">Arquiteto Sênior DevOps &amp; Multi-Cloud. Mais de 8 anos em infraestrutura crítica com Azure, AWS, GCP, Oracle Cloud e IBM Cloud.</p>
+      <p data-en="I lead the data platform at VR Benefícios and teach postgraduate courses at Faculdade ESUDA. I built this portfolio as a platform game. Press <strong>Play</strong> to go down the page with the character, or just scroll if you prefer reading.">Lidero a plataforma de dados na VR Benefícios e sou professor de pós-graduação na Faculdade ESUDA. Montei este portfólio como um jogo de plataforma. Aperte <strong>Jogar</strong> para descer a página com o personagem, ou role normalmente se preferir só ler.</p>
+    </div>
+    <div class="heroi-acoes">
+      <button class="botao-pixel" type="button" data-acao="jogar"><span class="rotulo-jogar">▶ Jogar</span> <kbd>Enter</kbd></button>
+      <a class="botao-linha" href="#perfil" data-en="Just let me read ↓">Só quero ler ↓</a>
+    </div>
+    <div class="heroi-extras">
+      <button class="botao-linha" type="button" data-acao="speedrun" data-en="⏱ Speedrun">⏱ Speedrun</button>
+      <button class="botao-linha" type="button" data-acao="conquistas" data-en="🏅 Achievements">🏅 Conquistas</button>
+      <button class="botao-linha" type="button" data-acao="skins" data-en="🎭 Skins">🎭 Skins</button>
+      <button class="botao-linha" type="button" data-acao="ranking" data-en="🏆 Ranking">🏆 Ranking</button>
+    </div>
+    <ul class="controles" aria-label="Controles">
+      <li data-en="<kbd>←</kbd><kbd>→</kbd> walk"><kbd>←</kbd><kbd>→</kbd> anda</li>
+      <li data-en="<kbd>space</kbd> jump, 2× in the air"><kbd>espaço</kbd> pula, 2× no ar</li>
+      <li data-en="<kbd>↓</kbd> drop, punch in the air"><kbd>↓</kbd> desce, no ar dá soco</li>
+      <li data-en="<kbd>X</kbd> Spirit Gun · hold to charge"><kbd>X</kbd> Rei Gun · segure p/ carregar</li>
+      <li data-en="<kbd>Shift</kbd> dash"><kbd>Shift</kbd> dash</li>
+    </ul>
+    <nav class="mapa cartao" data-plat data-bits="3" aria-label="Seções do portfólio">
+      <p class="mapa-titulo" data-en="Sections">Seções</p>
+      <ol>
+        <li><a href="#perfil"><b>1</b><span data-en="Profile">Perfil</span></a></li><li><a href="#atuacao"><b>2</b><span data-en="Expertise">Atuação</span></a></li>
+        <li><a href="#trajetoria"><b>3</b><span data-en="Career">Trajetória</span></a></li><li><a href="#projetos"><b>4</b><span data-en="Projects">Projetos</span></a></li>
+        <li><a href="#pipeline"><b>5</b>Pipeline</a></li><li><a href="#certificacoes"><b>6</b><span data-en="Certifications">Certificações</span></a></li>
+        <li><a href="#formacao"><b>7</b><span data-en="Education">Formação</span></a></li><li><a href="#contato"><b>8</b><span data-en="Contact">Contato</span></a></li>
+      </ol>
+    </nav>
+  </div>
+</section>
+
+<!-- ============ FASE 1 · PERFIL ============ -->
+<section class="fase" id="perfil" data-fase="1" data-nome="Perfil">
+  <p class="rotulo" data-en="LEVEL 1 · PROFILE">FASE 1 · PERFIL</p>
+  <h2 class="titulo-fase" data-plat data-pouso data-letras data-en="PROFILE">PERFIL</h2>
+  <div class="grade g4">
+    <article class="cartao" data-plat data-bits="4"><span class="num">8+</span><p data-en="years of experience in mission-critical infrastructure">anos de experiência em infraestrutura crítica</p></article>
+    <article class="cartao" data-plat data-bugs="1"><span class="num">5</span><p data-en="clouds: Azure, AWS, GCP, Oracle and IBM">clouds: Azure, AWS, GCP, Oracle e IBM</p></article>
+    <article class="cartao" data-plat data-bits="4"><span class="num">30+</span><p data-en="certifications and 50+ badges">certificações e mais de 50 badges</p></article>
+    <article class="cartao" data-plat data-cafe><span class="num">10+</span><p data-en="portfolio projects on GitHub">projetos de portfólio no GitHub</p></article>
+  </div>
+  <div class="grade g2">
+    <article class="cartao" data-plat data-bits="5"><h3 data-en="Today">Hoje</h3><p data-en="DevOps Specialist and Data Platform Architect at <b>VR Benefícios</b>. Postgraduate professor at <b>Faculdade ESUDA</b>.">Especialista DevOps e Arquiteto de Plataforma de Dados na <b>VR Benefícios</b>. Professor de pós-graduação na <b>Faculdade ESUDA</b>.</p></article>
+    <article class="cartao" data-plat data-glitch="1"><h3 data-en="Where I am">Onde estou</h3><p data-en="Ponta de Pedras/PE, Brazil. Remote or Recife/PE.">Ponta de Pedras/PE. Atuo remoto ou em Recife/PE.</p></article>
+  </div>
+</section>
+
+<!-- ============ FASE 2 · ATUAÇÃO ============ -->
+<section class="fase" id="atuacao" data-fase="2" data-nome="Atuação">
+  <p class="rotulo" data-en="LEVEL 2 · EXPERTISE">FASE 2 · ATUAÇÃO</p>
+  <h2 class="titulo-fase" data-plat data-pouso data-letras data-en="EXPERTISE">ATUAÇÃO</h2>
+  <div class="grade g3">
+    <article class="cartao" data-plat data-skill="Azure" data-sx=".5" data-bits="3"><h3>Cloud</h3><p>Azure 95%, AWS 82%, GCP 68%, Oracle Cloud 60%.</p><div class="tags"><i>Azure</i><i>AWS</i><i>GCP</i><i>OCI</i></div></article>
+    <article class="cartao" data-plat data-skill="Terraform" data-sx=".5" data-mob="crash" data-escudo><h3 data-en="DevOps and CI/CD">DevOps e CI/CD</h3><p>Terraform 92%, Azure DevOps 93%, GitHub Actions 85%, Jenkins 80%.</p><div class="tags"><i>Terraform</i><i>Azure DevOps</i><i>GitHub Actions</i></div></article>
+    <article class="cartao" data-plat data-skill="Kubernetes" data-sx=".5" data-bits="3"><h3>Containers</h3><p>Docker 90%, Kubernetes 88%, Helm 75%, ArgoCD 70%.</p><div class="tags"><i>Docker</i><i>Kubernetes</i><i>Helm</i><i>ArgoCD</i></div></article>
+  </div>
+  <div class="grade g3">
+    <article class="cartao" data-plat data-skill="Databricks" data-sx=".5" data-bits="3"><h3>Big Data</h3><p>Databricks 90%, Azure Data Factory 85%, S3 80%, Redshift 75%.</p><div class="tags"><i>Databricks</i><i>ADF</i><i>Redshift</i></div></article>
+    <article class="cartao" data-plat data-skill="DevSecOps" data-sx=".5" data-mob="vaza"><h3 data-en="Security">Segurança</h3><p>DevSecOps 85%, Cloud Security 85%, Zero Trust 82%, Fortinet NSE 78%.</p><div class="tags"><i>DevSecOps</i><i>Zero Trust</i><i>Fortinet</i></div></article>
+    <article class="cartao" data-plat data-skill="FinOps" data-sx=".5" data-bits="3"><h3 data-en="Observability and FinOps">Observabilidade e FinOps</h3><p>FinOps 90%, Dynatrace 85%, Datadog 80%, OpenTelemetry 75%.</p><div class="tags"><i>FinOps</i><i>Dynatrace</i><i>Datadog</i></div></article>
+  </div>
+</section>
+
+<!-- ============ FASE 3 · TRAJETÓRIA ============ -->
+<section class="fase" id="trajetoria" data-fase="3" data-nome="Trajetória">
+  <p class="rotulo" data-en="LEVEL 3 · CAREER">FASE 3 · TRAJETÓRIA</p>
+  <h2 class="titulo-fase" data-plat data-pouso data-letras data-en="CAREER">TRAJETÓRIA</h2>
+  <div class="grade g2">
+    <article class="cartao" data-plat data-bits="5"><span class="data">2018 → 2020</span><h3 data-en="Professor and IT Coordinator">Professor e Coordenador de TI</h3><p data-en="Faculdade Elo, Unifbv and Microlins. Teaching and coordination of technology courses.">Faculdade Elo, Unifbv e Microlins. Docência e coordenação de cursos de tecnologia.</p></article>
+    <article class="cartao" data-plat data-bugs="1"><span class="data">2020 → 2021</span><h3>Accenture Brasil</h3><p data-en="DevOps Engineer and Consultant. Multi-cloud Azure and AWS, CI/CD and AWS support (EC2, RDS, Redshift).">DevOps Engineer e Consultor. Multi-cloud Azure e AWS, CI/CD e sustentação AWS (EC2, RDS, Redshift).</p></article>
+    <article class="cartao" data-plat data-bits="5"><span class="data">2021 → 2025</span><h3>UniFBV Wyden</h3><p data-en="University professor: Cloud Computing, Python, Operating Systems and Networks.">Professor universitário: Cloud Computing, Python, Sistemas Operacionais e Redes.</p></article>
+    <article class="cartao" data-plat data-bits="5" data-cafe><span class="data" data-en="Nov 2021 → present">Nov 2021 → hoje</span><h3>VR Benefícios</h3><p data-en="DevOps Specialist and Data Platform Architect: Azure architecture, CI/CD pipelines, Databricks, FinOps and governance.">Especialista DevOps e Arquiteto de Plataforma de Dados: arquitetura Azure, pipelines CI/CD, Databricks, FinOps e governança.</p></article>
+    <article class="cartao larga" data-plat data-bits="6"><span class="data" data-en="Aug 2026 → present">ago 2026 → hoje</span><h3 data-en="Professor · Faculdade ESUDA">Professor · Faculdade ESUDA</h3><p data-en="Outsourced · Recife, Pernambuco · on-site. Postgraduate (Lato Sensu) professor, specialization in Information Security. Course: applied cryptography and secure protocols.">Terceirizado · Recife, Pernambuco · presencial. Professor de pós-graduação Lato Sensu, especialização em Segurança da Informação. Disciplina: criptografia aplicada e protocolos seguros.</p></article>
+  </div>
+</section>
+
+<!-- ============ FASE 4 · PROJETOS ============ -->
+<section class="fase" id="projetos" data-fase="4" data-nome="Projetos">
+  <p class="rotulo" data-en="LEVEL 4 · PROJECTS">FASE 4 · PROJETOS</p>
+  <h2 class="titulo-fase" data-plat data-pouso data-letras data-en="PROJECTS">PROJETOS</h2>
+  <div class="grade g2">
+
+    <a class="cartao proj" data-plat data-bits="3" href="https://github.com/leandroninja/genai-platform-gcp" target="_blank" rel="noopener">
+      <h3>genai-platform-gcp</h3>
+      <p data-en="Production-grade GenAI platform on Google Cloud: RAG pipeline and agent API.">Plataforma de IA Generativa em produção no Google Cloud: pipeline RAG e API de agentes.</p>
+      <div class="fluxo"><i>GitHub Actions</i><u>→</u><i>Terraform</i><u>→</u><i>Cloud Run</i><u>→</u><i>Vertex AI</i></div>
+      <div class="tags"><i>GKE</i><i>Vertex AI</i><i>Cloud Run</i><i>LangChain</i><i>Prometheus</i></div>
+      <p class="res" data-en="<b>Delivery:</b> 100% Terraform infrastructure, keyless CI/CD (Workload Identity Federation) and full observability."><b>Entrega:</b> infraestrutura 100% Terraform, CI/CD sem chaves (Workload Identity Federation) e observabilidade completa.</p>
+    </a>
+
+    <a class="cartao proj" data-plat data-mob="fatura" href="https://github.com/leandroninja/gcp-azure-devops-platform" target="_blank" rel="noopener">
+      <h3>gcp-azure-devops-platform</h3>
+      <p data-en="Multi-cloud DevOps platform running Kubernetes on GCP and Azure at the same time.">Plataforma DevOps multi-cloud com Kubernetes no GCP e no Azure ao mesmo tempo.</p>
+      <div class="fluxo"><i>PR</i><u>→</u><i>Scan</i><u>→</u><i>TF Plan</i><u>→</u><i>Blue-green</i><u>→</u><i>GKE + AKS</i></div>
+      <div class="tags"><i>GKE</i><i>AKS</i><i>Key Vault</i><i>OIDC</i><i>Canary</i></div>
+      <p class="res" data-en="<b>Delivery:</b> GitHub Actions orchestrating blue-green and canary deployments, with automatic IaC, container and dependency scans on every PR."><b>Entrega:</b> GitHub Actions orquestrando deploys blue-green e canary, com scan automático de IaC, containers e dependências em todo PR.</p>
+    </a>
+
+    <a class="cartao proj" data-plat data-bits="3" href="https://github.com/leandroninja/terraform-multicloud-infra" target="_blank" rel="noopener">
+      <h3>terraform-multicloud-infra</h3>
+      <p data-en="Reusable Terraform modules for Azure, AWS and Oracle Cloud.">Módulos Terraform reutilizáveis para Azure, AWS e Oracle Cloud.</p>
+      <div class="fluxo"><i>Terraform</i><u>→</u><i>Azure AKS</i><u>|</u><i>AWS EKS</i><u>|</u><i>OCI</i></div>
+      <div class="tags"><i>VNet</i><i>VPC</i><i>VCN</i><i>HCL</i></div>
+      <p class="res" data-en="<b>Delivery:</b> enterprise multi-cloud IaC with networking, security and monitoring built in."><b>Entrega:</b> IaC multi-cloud enterprise com rede, segurança e monitoramento já incluídos.</p>
+    </a>
+
+    <a class="cartao proj" data-plat data-escudo href="https://github.com/leandroninja/devsecops-pipeline-suite" target="_blank" rel="noopener">
+      <h3>devsecops-pipeline-suite</h3>
+      <p data-en="CI/CD with built-in security for enterprise environments, on Azure DevOps and Jenkins.">CI/CD com segurança integrada para ambientes enterprise, em Azure DevOps e Jenkins.</p>
+      <div class="fluxo"><i>Gitleaks</i><u>→</u><i>SAST</i><u>→</u><i>Trivy</i><u>→</u><i>OPA</i><u>→</u><i>Deploy</i></div>
+      <div class="tags"><i>SonarQube</i><i>Checkov</i><i>Falco</i><i>Istio mTLS</i><i>ZAP</i></div>
+      <p class="res" data-en="<b>Delivery:</b> blocking gates at every stage: secrets, SAST, SCA, image scan, IaC scan and Kubernetes policies."><b>Entrega:</b> portões de bloqueio em cada estágio: segredos, SAST, SCA, scan de imagem, scan de IaC e políticas Kubernetes.</p>
+    </a>
+
+    <a class="cartao proj" data-plat data-bits="3" href="https://github.com/leandroninja/databricks-lakehouse-platform" target="_blank" rel="noopener">
+      <h3>databricks-lakehouse-platform</h3>
+      <p data-en="Enterprise Lakehouse on Azure Databricks with the Medallion architecture.">Lakehouse enterprise no Azure Databricks com arquitetura Medalha.</p>
+      <div class="fluxo"><i>Fontes</i><u>→</u><i>Bronze</i><u>→</u><i>Silver</i><u>→</u><i>Gold</i></div>
+      <div class="tags"><i>Delta Lake</i><i>Unity Catalog</i><i>Auto Loader</i></div>
+      <p class="res" data-en="<b>Delivery:</b> data pipelines with schema evolution, governance through Unity Catalog and Delta Lake storage."><b>Entrega:</b> pipelines de dados com evolução de schema, governança via Unity Catalog e armazenamento em Delta Lake.</p>
+    </a>
+
+    <a class="cartao proj" data-plat data-mob="fatura" href="https://github.com/leandroninja/finops-cloud-optimizer" target="_blank" rel="noopener">
+      <h3>finops-cloud-optimizer</h3>
+      <p data-en="Multi-cloud FinOps automation that collects, analyzes and optimizes spending.">Automação FinOps multi-cloud que coleta, analisa e otimiza gastos.</p>
+      <div class="fluxo"><i>Azure Cost</i><u>+</u><i>AWS Cost</i><u>+</u><i>OCI</i><u>→</u><i>Análise</i><u>→</u><i>Rightsizing</i></div>
+      <div class="tags"><i>Python</i><i>boto3</i><i>Terraform</i><i>Docker</i></div>
+      <p class="res" data-en="<b>Delivery:</b> actionable savings recommendations and automated reports across three clouds."><b>Entrega:</b> recomendações de economia acionáveis e relatórios automatizados nas três clouds.</p>
+    </a>
+
+    <a class="cartao proj" data-plat data-bits="3" href="https://github.com/leandroninja/harness-platform-complete-demo" target="_blank" rel="noopener">
+      <h3>harness-platform-complete-demo</h3>
+      <p data-en="Complete Harness platform covering the four certified modules.">Plataforma Harness completa cobrindo os quatro módulos certificados.</p>
+      <div class="fluxo"><i>Push</i><u>→</u><i>CI</i><u>→</u><i>CD Blue-Green</i><u>→</u><i>STO</i><u>→</u><i>CCM</i></div>
+      <div class="tags"><i>Harness CI</i><i>GitOps</i><i>STO</i><i>CCM</i><i>OPA</i></div>
+      <p class="res" data-en="<b>Delivery:</b> a working reference implementation with real pipelines for build, delivery, security and cost."><b>Entrega:</b> implementação de referência funcional, com pipelines reais de build, entrega, segurança e custo.</p>
+    </a>
+
+    <a class="cartao proj" data-plat data-glitch="1" href="https://github.com/leandroninja/opentelemetry-sre-platform" target="_blank" rel="noopener">
+      <h3>opentelemetry-sre-platform</h3>
+      <p data-en="Complete SRE stack following observability and SLO principles.">Stack SRE completa seguindo princípios de observabilidade e SLO.</p>
+      <div class="fluxo"><i>FastAPI</i><u>→</u><i>OTel Collector</i><u>→</u><i>Datadog</i><u>+</u><i>Prometheus</i><u>→</u><i>SLO</i></div>
+      <div class="tags"><i>OpenTelemetry</i><i>Grafana</i><i>Jaeger</i><i>GKE</i></div>
+      <p class="res" data-en="<b>Delivery:</b> three SLOs with error budgets, burn-rate alerts and documented incident runbooks."><b>Entrega:</b> três SLOs com error budgets, alertas de burn rate e runbooks de incidente documentados.</p>
+    </a>
+
+    <a class="cartao proj larga" data-plat data-bits="4" href="https://github.com/leandroninja/databricks-ml-platform-three-clouds" target="_blank" rel="noopener">
+      <h3>databricks-ml-platform-three-clouds</h3>
+      <p data-en="Databricks Lakehouse in production on Azure, AWS and GCP, with machine learning and GenAI.">Databricks Lakehouse em produção no Azure, AWS e GCP, com machine learning e GenAI.</p>
+      <div class="fluxo"><i>Azure</i><u>+</u><i>AWS</i><u>+</u><i>GCP</i><u>→</u><i>Bronze → Gold</i><u>→</u><i>MLflow</i><u>→</u><i>RAG</i></div>
+      <div class="tags"><i>Unity Catalog</i><i>MLflow</i><i>Vector Search</i><i>LangChain</i><i>Terraform</i></div>
+      <p class="res" data-en="<b>Delivery:</b> infrastructure provisioning, workflow orchestration, governance and RAG pipelines on the same stack across three clouds."><b>Entrega:</b> provisionamento de infraestrutura, orquestração de workflows, governança e pipelines RAG na mesma stack nas três clouds.</p>
+    </a>
+  </div>
+  <pre class="codigo" data-plat data-bits="6"><code><b>resource</b> "azurerm_kubernetes_cluster" "main" {
+  name = "aks-${var.env}"
+  default_node_pool { vm_size = "Standard_D4s_v5" }
+  identity          { type = "SystemAssigned" }
+}   <u># infraestrutura como código, multi-cloud</u></code></pre>
+</section>
+
+<!-- ============ FASE 5 · PIPELINE ============ -->
+<section class="fase" id="pipeline" data-fase="5" data-nome="Pipeline">
+  <p class="rotulo" data-en="LEVEL 5 · PIPELINE">FASE 5 · PIPELINE</p>
+  <h2 class="titulo-fase" data-plat data-pouso data-letras>PIPELINE</h2>
+  <p class="lead" data-plat data-en="Pass through every stage and turn the pipeline green.">Passe por todas as etapas e deixe o pipeline verde.</p>
+  <div class="grade g4 etapas">
+    <article class="cartao etapa" data-plat data-etapa="BUILD" data-bugs="1"><span class="data" data-en="STAGE 1">ETAPA 1</span><h3>BUILD</h3><p data-en="Build, container lint and secret detection (Gitleaks, Hadolint).">Build, lint de container e detecção de segredos (Gitleaks, Hadolint).</p></article>
+    <article class="cartao etapa" data-plat data-etapa="TEST" data-mob="crash"><span class="data" data-en="STAGE 2">ETAPA 2</span><h3>TEST</h3><p data-en="Tests and static analysis (SonarQube, Bandit) with a quality gate.">Testes e análise estática (SonarQube, Bandit) com quality gate.</p></article>
+    <article class="cartao etapa" data-plat data-etapa="SCAN" data-mob="vaza"><span class="data" data-en="STAGE 3">ETAPA 3</span><h3>SCAN</h3><p data-en="Trivy image scan, Checkov/tfsec for IaC and OPA policies.">Scan de imagem com Trivy, Checkov/tfsec para IaC e políticas OPA.</p></article>
+    <article class="cartao etapa" data-plat data-etapa="DEPLOY" data-mob="fatura"><span class="data" data-en="STAGE 4">ETAPA 4</span><h3>DEPLOY</h3><p data-en="Blue-green and canary on GKE and AKS, with automatic rollback.">Blue-green e canary no GKE e AKS, com rollback automático.</p></article>
+  </div>
+</section>
+
+<!-- ============ FASE 6 · CERTIFICAÇÕES ============ -->
+<section class="fase" id="certificacoes" data-fase="6" data-nome="Certificações">
+  <p class="rotulo" data-en="LEVEL 6 · CERTIFICATIONS">FASE 6 · CERTIFICAÇÕES</p>
+  <h2 class="titulo-fase" data-plat data-pouso data-letras data-en="CERTIFICATIONS">CERTIFICAÇÕES</h2>
+  <div class="grade g3">
+    <article class="cartao" data-plat data-trofeu="AZ-400 · DevOps Expert"><h3>Microsoft</h3><p>AZ-400, AZ-305, AZ-104.</p></article>
+    <article class="cartao" data-plat data-trofeu="Databricks Platform Architect"><h3>Databricks</h3><p data-en="Platform Architect and GenAI Fundamentals.">Platform Architect e GenAI Fundamentals.</p></article>
+    <article class="cartao" data-plat data-bugs="1"><h3>AWS</h3><p data-en="Solutions Architect SAA-C02 and Cloud Practitioner.">Solutions Architect SAA-C02 e Cloud Practitioner.</p></article>
+  </div>
+  <div class="grade g3">
+    <article class="cartao" data-plat data-bits="4"><h3>Linux Foundation</h3><p data-en="DevSecOps, GitOps and Zero Trust.">DevSecOps, GitOps e Zero Trust.</p></article>
+    <article class="cartao" data-plat data-bits="4"><h3 data-en="Fortinet and OCI">Fortinet e OCI</h3><p data-en="Fortinet NSE and OCI Foundations.">Fortinet NSE e OCI Foundations.</p></article>
+    <article class="cartao" data-plat data-bits="4"><h3 data-en="Intel and GCP">Intel e GCP</h3><p data-en="CloudDevOps, FinOps and GCP DevOps (in progress).">CloudDevOps, FinOps e GCP DevOps (em curso).</p></article>
+  </div>
+  <p class="nota" data-plat data-segredo data-en="50+ badges: Databricks Academy, Harness, Intel, Datadog, Linux Foundation, Fortinet, PMI, Microsoft and Aviatrix.">Mais de 50 badges: Databricks Academy, Harness, Intel, Datadog, Linux Foundation, Fortinet, PMI, Microsoft e Aviatrix.</p>
+</section>
+
+<!-- ============ FASE 7 · FORMAÇÃO ============ -->
+<section class="fase" id="formacao" data-fase="7" data-nome="Formação">
+  <p class="rotulo" data-en="LEVEL 7 · EDUCATION">FASE 7 · FORMAÇÃO</p>
+  <h2 class="titulo-fase" data-plat data-pouso data-letras data-en="EDUCATION">FORMAÇÃO</h2>
+  <div class="grade g3">
+    <article class="cartao" data-plat data-bits="3"><span class="data">2017</span><h3 data-en="Information Systems">Sistemas de Informação</h3><p data-en="Bachelor's degree, Faculdade Joaquim Nabuco.">Bacharelado, Faculdade Joaquim Nabuco.</p></article>
+    <article class="cartao" data-plat data-bits="3" data-escudo><span class="data">2020</span><h3 data-en="Agile Projects">Projetos Ágeis</h3><p data-en="Postgraduate in Agile Project Management.">Pós em Gerenciamento de Projetos Ágeis.</p></article>
+    <article class="cartao" data-plat data-bits="3"><span class="data">2021</span><h3 data-en="MBA in Big Data">MBA em Big Data</h3><p>UniBF.</p></article>
+  </div>
+  <div class="grade g3">
+    <article class="cartao" data-plat data-bits="3"><span class="data">2025</span><h3 data-en="Artificial Intelligence">Inteligência Artificial</h3><p data-en="Specialization, UniCorp.">Especialização, UniCorp.</p></article>
+    <article class="cartao" data-plat data-bits="3"><span class="data">2026</span><h3 data-en="Information Security">Segurança da Informação</h3><p data-en="Specialization, UniCorp.">Especialização, UniCorp.</p></article>
+    <article class="cartao" data-plat data-cafe><span class="data" data-en="in progress">em curso</span><h3 data-en="Master's">Mestrado</h3><p data-en="Special student, UFPE / Edumatec.">Aluno especial, UFPE / Edumatec.</p></article>
+  </div>
+</section>
+
+<!-- ============ FASE 8 · CONTATO ============ -->
+<section class="fase" id="contato" data-fase="8" data-nome="Contato">
+  <p class="rotulo" data-en="LEVEL 8 · CONTACT">FASE 8 · CONTATO</p>
+  <h2 class="titulo-fase" data-plat data-pouso data-letras data-en="CONTACT">CONTATO</h2>
+  <p class="lead" data-plat data-en="You made it to the end. Shall we build something together?">Você chegou ao fim. Vamos construir algo juntos?</p>
+  <div class="contatos">
+    <a class="botao-pixel" data-plat data-bits="4" href="mailto:leandro.moraes.devops@gmail.com">✉ leandro.moraes.devops@gmail.com</a>
+    <a class="botao-linha" data-plat href="https://linkedin.com/in/leandro-oliveira-26b14768" target="_blank" rel="noopener">LinkedIn</a>
+    <a class="botao-linha" data-plat href="https://github.com/leandroninja" target="_blank" rel="noopener">GitHub</a>
+    <a class="botao-linha" data-plat href="tel:+5581996377099">(81) 99637-7099</a>
+  </div>
+  <p class="rodape" data-en="© 2026 Leandro Oliveira Moraes · hint: press ` to open a secret terminal">© 2026 Leandro Oliveira Moraes · dica: aperte ` para abrir um terminal secreto</p>
+</section>
+
+<!-- ============ FASE 9 · SALA SECRETA (bônus) ============ -->
+<section class="fase bonus" id="bonus" data-fase="9" data-bonus data-nome="Sala secreta">
+  <p class="rotulo" data-en="SECRET ROOM · BADGES">SALA SECRETA · BADGES</p>
+  <h2 class="titulo-fase" data-plat data-pouso data-letras data-en="SERVER ROOM">SERVIDORES</h2>
+  <p class="lead" data-plat data-en="50+ badges earned. Grab the seals on top of each rack and take the exit portal.">Mais de 50 badges conquistados. Pegue os selos no topo de cada rack e saia pelo portal.</p>
+  <div class="racks">
+    <div class="rack" style="height:130px" data-plat data-badge="Databricks Academy" data-bits="2"><span>Databricks<br>Academy</span><em></em></div>
+    <div class="rack" style="height:210px" data-plat data-badge="Harness" data-bits="2"><span>Harness</span><em></em></div>
+    <div class="rack" style="height:90px" data-plat data-badge="Intel" data-bits="2"><span>Intel</span><em></em></div>
+    <div class="rack" style="height:260px" data-plat data-badge="Datadog" data-bits="2"><span>Datadog</span><em></em></div>
+    <div class="rack" style="height:160px" data-plat data-badge="Linux Foundation" data-bits="2"><span>Linux<br>Foundation</span><em></em></div>
+    <div class="rack" style="height:300px" data-plat data-badge="Fortinet" data-bits="2"><span>Fortinet</span><em></em></div>
+    <div class="rack" style="height:120px" data-plat data-badge="PMI" data-bits="2"><span>PMI</span><em></em></div>
+    <div class="rack" style="height:220px" data-plat data-badge="Microsoft" data-bits="2"><span>Microsoft</span><em></em></div>
+    <div class="rack" style="height:170px" data-plat data-badge="Aviatrix" data-bits="2"><span>Aviatrix</span><em></em></div>
+    <div class="rack saida" style="height:110px" data-plat data-portal><span data-en="EXIT">SAÍDA</span><em></em></div>
+  </div>
+</section>
+
+</main>
+
+<div id="painel" class="painel" hidden></div>
+<div id="pad" aria-hidden="true">
+  <div><button data-k="esq">◀</button><button data-k="dir">▶</button></div>
+  <div><button data-k="dash">»</button><button data-k="tiro">⚡</button><button data-k="baixo">▼</button><button data-k="pulo">▲</button></div>
+</div>
+
+<script src="js/som.js"></script>
+<script src="js/dados.js"></script>
+<script src="js/jogo.js"></script>
+</body>
+</html>
