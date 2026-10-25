@@ -50,6 +50,21 @@ PV.i18n = (function(){
     ['resolvido em ', 'resolved in '], ['TOUR GUIADO', 'GUIDED TOUR'], ['toque ou aperte uma tecla para assumir o controle', 'tap or press a key to take control'],
     ['você assumiu o controle', 'you took control'], ['Tour concluído! Agora é com você: derrote o Bug Gigante', 'Tour complete! Now it is your turn: defeat the Giant Bug'],
     ['fim da linha! Há salas secretas escondidas: procure os blocos ? e !', 'end of the line! Secret rooms are hidden: look for the ? and ! blocks'],
+    ['MUNDO IBM CLOUD', 'IBM CLOUD WORLD'], ['MUNDO AZURE', 'AZURE WORLD'], ['MUNDO ORACLE', 'ORACLE WORLD'], ['MUNDO AWS', 'AWS WORLD'], ['MUNDO GCP', 'GCP WORLD'],
+    ['MESTRE MULTI-CLOUD', 'MULTI-CLOUD MASTER'], ['SELOS MULTI-CLOUD ', 'MULTI-CLOUD SEALS '], ['SELOS', 'SEALS'], ['os 5 selos coletados', 'all 5 seals collected'],
+    ['monte a Landing Zone na ordem: 1 → 4', 'build the Landing Zone in order: 1 → 4'], ['monte a Landing Zone', 'build the Landing Zone'],
+    ['LANDING ZONE PRONTA', 'LANDING ZONE READY'], ['todas as peças no lugar', 'every piece in place'], ['ordem errada: primeiro ', 'wrong order: first '], [' · próximo: ', ' · next: '],
+    ['BLACK FRIDAY VENCIDA', 'BLACK FRIDAY SURVIVED'], ['todas as ondas', 'all waves cleared'], ['tráfego chegando', 'traffic incoming'], ['ONDA ', 'WAVE '],
+    [' · tráfego ', ' · traffic '], [' · ajudantes ', ' · helpers '], ['Black Friday: pegue as instâncias EC2 para chamar ajudantes', 'Black Friday: grab EC2 instances to call helpers'],
+    ['+ EC2 (ajudante)', '+ EC2 (helper)'], ['pipeline RAG', 'RAG pipeline'], ['RAG COMPLETO', 'RAG COMPLETE'], ['todos os trechos entregues', 'all chunks delivered'],
+    ['trechos corrompidos!', 'chunks corrupted!'], [' · carregando ', ' · carrying '], ['trecho(s)', 'chunk(s)'],
+    ['junte os trechos e leve ao altar Vertex AI; cuidado com as alucinações', 'gather the chunks and take them to the Vertex AI altar; beware of hallucinations'],
+    ['janela de manutenção', 'maintenance window'], ['MANUTENÇÃO CONCLUÍDA', 'MAINTENANCE DONE'], ['tablespaces coletados', 'tablespaces collected'],
+    ['as plataformas somem em ciclos: colete os tablespaces', 'platforms vanish in cycles: collect the tablespaces'],
+    ['orçamento de erros', 'error budget'], ['ORÇAMENTO DE ERROS ', 'ERROR BUDGET '], ['dentro do orçamento de erros', 'within the error budget'], ['SLO CUMPRIDO', 'SLO MET'],
+    ['SLO VIOLADO', 'SLO BREACHED'], ['recomeçando o percurso', 'restarting the course'], ['SRE: você tem 3 falhas de orçamento. Chegue ao SLO!', 'SRE: you have 3 failures of budget. Reach the SLO!'],
+    ['falha! orçamento restante: ', 'failure! budget left: '], ['sala final', 'final room'],
+    ['você dominou as 5 clouds! pegue os selos e saia pelo portal', 'you mastered all 5 clouds! grab the seals and take the portal'],
     ['sem pausa no speedrun', 'no pausing in speedrun'], ['sem terminal no speedrun', 'no terminal in speedrun']
   ].sort(function(a, b){ return b[0].length - a[0].length; });
 
@@ -88,6 +103,12 @@ PV.conquistas = (function(){
     { id: 'terminal', pt: 'Hacker de terminal', en: 'Terminal hacker', dpt: 'Use o terminal secreto (tecla `).', den: 'Use the secret terminal (` key).' },
     { id: 'zerou', pt: 'Zerou o jogo', en: 'Beat the game', dpt: 'Chegue ao fim do jogo.', den: 'Reach the end of the game.' },
     { id: 'sem_morrer', pt: 'Zerou sem morrer', en: 'No-death run', dpt: 'Termine o jogo sem morrer nenhuma vez.', den: 'Finish the game without dying.' },
+    { id: 'azure', pt: 'Landing Zone no ar', en: 'Landing Zone is live', dpt: 'Monte a Landing Zone no mundo Azure.', den: 'Build the Landing Zone in the Azure world.' },
+    { id: 'aws', pt: 'Sobreviveu à Black Friday', en: 'Survived Black Friday', dpt: 'Vença as 3 ondas no mundo AWS.', den: 'Beat the 3 waves in the AWS world.' },
+    { id: 'gcp', pt: 'RAG entregue', en: 'RAG delivered', dpt: 'Entregue todos os trechos no mundo GCP.', den: 'Deliver every chunk in the GCP world.' },
+    { id: 'oracle', pt: 'Manutenção em dia', en: 'Maintenance on schedule', dpt: 'Colete os tablespaces no mundo Oracle.', den: 'Collect the tablespaces in the Oracle world.' },
+    { id: 'ibm', pt: 'SLO cumprido', en: 'SLO met', dpt: 'Chegue ao SLO dentro do orçamento de erros (IBM Cloud).', den: 'Reach the SLO within the error budget (IBM Cloud).' },
+    { id: 'multicloud', pt: 'Mestre Multi-Cloud', en: 'Multi-Cloud master', dpt: 'Complete os 5 mundos das clouds.', den: 'Complete all 5 cloud worlds.' },
     { id: 'plantao', pt: 'Plantonista', en: 'On-call engineer', dpt: 'Termine o plantão na Central de Incidentes.', den: 'Finish the shift in the Incident Center.' },
     { id: 'incidentes', pt: 'Plantão perfeito', en: 'Perfect on-call', dpt: 'Resolva os 6 alertas dentro do SLA.', den: 'Resolve all 6 alerts within the SLA.' },
     { id: 'finops', pt: 'FinOps em ação', en: 'FinOps in action', dpt: 'Derrote a fatura de cloud.', den: 'Defeat the cloud bill.' },
@@ -127,7 +148,9 @@ PV.skins = (function(){
     { id: 'espirito', pt: 'Espírito verde', en: 'Green spirit', req: 'tiro', oculos: false,
       pal: { B: '#2f9e44', b: '#1f6b2e', L: '#ffffff', J: '#1b2b4a', D: '#0b0b10' } },
     { id: 'dourado', pt: 'Campeão dourado', en: 'Golden champion', req: 'sem_morrer', oculos: false,
-      pal: { B: '#e0a84f', b: '#a8741f', L: '#fff0c4', J: '#5a3d12', D: '#2a2018' } }
+      pal: { B: '#e0a84f', b: '#a8741f', L: '#fff0c4', J: '#5a3d12', D: '#2a2018' } },
+    { id: 'multicloud', pt: 'Multi-Cloud', en: 'Multi-Cloud', req: 'multicloud', oculos: false,
+      pal: { B: '#0f62fe', b: '#0a3da8', L: '#ff9900', J: '#c74634', D: '#2a2018' } }
   ];
   var atual = 'padrao';
   try { atual = localStorage.getItem('pv-skin') || 'padrao'; } catch (e) {}

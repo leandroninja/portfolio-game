@@ -152,7 +152,7 @@ M.medir = function(){
   M.W = root.clientWidth;
   M.H = root.scrollHeight;
   M.esc = 3;
-  M.plats = []; M.porEl = new Map(); M.titulos = [];
+  M.plats = []; M.porEl = new Map(); M.titulos = []; M.patches = [];
 
   $$('[data-plat]').forEach(function(el){
     var w = el.offsetWidth;
@@ -180,6 +180,7 @@ M.medir = function(){
         }
       }
     }
+    if (el.dataset.patch !== undefined) { plat.patch = parseFloat(el.dataset.patch) || 0; M.patches.push(plat); }
     if (plat.letras) { plat.ph = el.offsetHeight; M.titulos.push(plat); }
     M.plats.push(plat);
     M.porEl.set(el, plat);
@@ -229,7 +230,7 @@ M.faseDe = function(y){
   return 0;
 };
 
-var INIM = { bug: 1, glitch: 1, crash: 1, vaza: 1, fatura: 1 };
+var INIM = { bug: 1, glitch: 1, crash: 1, vaza: 1, fatura: 1, onda: 1, alucina: 1 };
 
 M.criarEntidades = function(){
   var ents = [];
@@ -244,7 +245,13 @@ M.criarEntidades = function(){
   $$('[data-cafe]').forEach(function(el){ ents.push({ tipo: 'cafe', el: el, vivo: true }); });
   $$('[data-escudo]').forEach(function(el){ ents.push({ tipo: 'escudo', el: el, vivo: true }); });
   $$('[data-etapa]').forEach(function(el){ ents.push({ tipo: 'etapa', el: el, nome: el.dataset.etapa, vivo: true }); });
-  $$('[data-badge]').forEach(function(el){ ents.push({ tipo: 'badge', el: el, nome: el.dataset.badge, vivo: true }); });
+  $$('[data-badge]').forEach(function(el){ ents.push({ tipo: 'badge', el: el, nome: el.dataset.badge, grupo: el.dataset.grupo || '', vivo: true }); });
+  $$('[data-peca]').forEach(function(el){ ents.push({ tipo: 'peca', el: el, ord: +el.dataset.peca, nome: el.dataset.pecaNome, vivo: true }); });
+  $$('[data-ec2]').forEach(function(el){ ents.push({ tipo: 'ec2', el: el, vivo: true }); });
+  $$('[data-trecho]').forEach(function(el){ ents.push({ tipo: 'trecho', el: el, nome: 'doc ' + el.dataset.trecho, vivo: true }); });
+  $$('[data-altar]').forEach(function(el){ ents.push({ tipo: 'altar', el: el, vivo: true }); });
+  $$('[data-item]').forEach(function(el){ ents.push({ tipo: 'item', el: el, nome: el.dataset.item, sala: el.dataset.sala, vivo: true }); });
+  $$('[data-meta]').forEach(function(el){ ents.push({ tipo: 'meta', el: el, vivo: true }); });
   $$('[data-portal]').forEach(function(el){ ents.push({ tipo: 'portal', el: el, vivo: true }); });
   $$('[data-segredo]').forEach(function(el){ ents.push({ tipo: 'segredo', el: el, sala: el.dataset.segredo || 'badges', vivo: true }); });
   $$('[data-alerta]').forEach(function(el){ ents.push({ tipo: 'alerta', el: el, nome: el.dataset.alerta, nomeEn: el.dataset.alertaEn, sev: el.dataset.sev || 'P2', vivo: true, ativo: false }); });
@@ -266,6 +273,7 @@ M.criarEntidades = function(){
     if (pi.final) return;
     for (var k = 0; k < 4; k++) ents.push({ tipo: 'bit', piso: i, k: k, vivo: true });
   });
+  ents.forEach(function(e){ if (e.el) { var sec = e.el.closest('.fase'); e.secao = sec ? sec.id : ''; } });
   return ents;
 };
 
@@ -273,6 +281,7 @@ M.posicionar = function(ents){
   var k = M.esc / 3;
   ents.forEach(function(e){
     e.oculto = false;
+    if (e.dyn) return;
     if (e.tipo === 'bug') { e.w = 12 * M.esc; e.h = 8 * M.esc; }
     if (e.tipo === 'glitch') { e.w = 10 * M.esc; e.h = 10 * M.esc; }
     if (e.tipo === 'crash') { e.w = 11 * M.esc; e.h = 11 * M.esc; }
@@ -296,11 +305,14 @@ M.posicionar = function(ents){
         e.x = cxm - span / 2 + span * t;
         e.y = pl.y - 30 * k - Math.sin(Math.PI * t) * 24 * k;
         break;
-      case 'skill': case 'etapa': case 'badge': case 'alerta': e.x = pl.x + pl.w * (e.sx || 0.5); e.y = pl.y - 56 * k; break;
+      case 'skill': case 'etapa': case 'badge': case 'alerta': case 'peca': case 'trecho': case 'item': e.x = pl.x + pl.w * (e.sx || 0.5); e.y = pl.y - 56 * k; break;
       case 'trofeu': e.x = pl.x + pl.w * 0.5;  e.y = pl.y - 62 * k; break;
       case 'cafe':   e.x = pl.x + pl.w * 0.9;  e.y = pl.y - 30 * k; break;
       case 'escudo': e.x = pl.x + pl.w * 0.12; e.y = pl.y - 36 * k; break;
       case 'portal': e.x = pl.x + pl.w * 0.5;  e.y = pl.y - 46 * k; break;
+      case 'ec2':    e.x = pl.x + pl.w * 0.5;  e.y = pl.y - 40 * k; break;
+      case 'altar':  e.x = pl.x + pl.w * 0.5;  e.y = pl.y - 50 * k; break;
+      case 'meta':   e.x = pl.x + pl.w * 0.5;  e.y = pl.y - 64 * k; break;
       case 'segredo': e.x = pl.x + pl.w * 0.5; e.y = pl.y - 175 * k; break;
       case 'glitch': case 'vaza': e.cx = pl.x + pl.w * 0.5; e.cy = pl.y - 125 * k; e.ax = Math.min(pl.w * 0.42, 220 * k); break;
     }
@@ -324,6 +336,7 @@ function novoEstado(){
     ents: [], parts: [], textos: [], aneis: [], tiros: [], bolas: [], toasts: [], reiki: 100, boss: null,
     t: 0, crono: 0, cronoOn: false, pontos: 0, bits: 0, bitsTotal: 0,
     skills: [], skillsTotal: 0, trofeus: [], trofeusTotal: 0, bugs: 0, mortes: 0,
+    sala: null, nuvens: {}, finalEm: 0, finalSelos: 0,
     inc: { on: false, feito: false, idx: 0, t: 0, resolvidos: 0, estourados: 0, soma: 0, lista: [] }, tour: null, salas: {},
     etapas: 0, etapasTotal: 0, badges: 0, badgesTotal: 0, escudo: 0, flash: 0,
     segredo: false, segredoPts: false, noBonus: false, retorno: null, salvou: false, speed: false,
@@ -506,6 +519,7 @@ function fisica(dt, k){
   p.x += p.vx * dt;
   if (p.x < 0) { p.x = 0; p.vx = 0; } else if (p.x > M.W - p.w) { p.x = M.W - p.w; p.vx = 0; }
 
+  if (p.chao && p.chao.off) sairDoChao();
   if (p.chao) {
     var c = p.chao;
     if (p.x + p.w < c.x + 4 || p.x > c.x + c.w - 4) { sairDoChao(); p.coyote = C.coyote; }
@@ -519,7 +533,7 @@ function fisica(dt, k){
         var pl = M.plats[i];
         if (pl.y < p.pesAntes - 4) continue;
         if (pl.y > pes) break;
-        if (pl === p.ignorar) continue;
+        if (pl === p.ignorar || pl.off) continue;
         if (p.x + p.w <= pl.x + 4 || p.x >= pl.x + pl.w - 4) continue;
         alvo = pl; break;
       }
@@ -549,6 +563,7 @@ function fisica(dt, k){
 }
 
 function machucar(deX, k){
+  if (E.sala && E.sala.id === 'ibm' && !E.nuvens.ibm) { ibmFalha(deX, k); return; }
   if (E.escudo > 0) {
     E.escudo = 0; p.invuln = 1.1;
     som.tocar('escudo'); anel(p.x + p.w / 2, p.y + p.h / 2, 60 * k, '#7b42bc', .5, 4);
@@ -684,22 +699,199 @@ function teleportar(x, y){
   E.flash = 0.6;
   for (var i = 0; i < 28; i++) particula(x + p.w / 2, y + p.h / 2, rnd(-300, 300), rnd(-300, 300), rnd(.4, .9), i % 2 ? '#9b5cff' : '#fff', rnd(3, 7), 0);
 }
+/* ---------- salas secretas: mundos das clouds ---------- */
+var SEG_COR = {
+  badges: ['224,168,79', '#e0a84f', '#7a4f1a', '?'], incidentes: ['255,77,126', '#ff4d7e', '#7a1830', '!'],
+  azure: ['0,120,212', '#0078d4', '#02305c', 'A'], aws: ['255,153,0', '#ff9900', '#7a4a00', 'W'],
+  gcp: ['66,133,244', '#4285f4', '#17356b', 'G'], oracle: ['199,70,52', '#c74634', '#5c1a12', 'O'], ibm: ['15,98,254', '#0f62fe', '#06307a', 'I']
+};
+var SALAS_INFO = {
+  bonus: ['SALA SECRETA', 'SALA DE SERVIDORES', '#9b5cff'], incidentes: ['CENTRAL DE INCIDENTES', 'plantão iniciado', '#ff4d7e'],
+  azure: ['MUNDO AZURE', 'monte a Landing Zone', '#0078d4'], aws: ['MUNDO AWS', 'Black Friday', '#ff9900'],
+  gcp: ['MUNDO GCP', 'pipeline RAG', '#4285f4'], oracle: ['MUNDO ORACLE', 'janela de manutenção', '#c74634'],
+  ibm: ['MUNDO IBM CLOUD', 'orçamento de erros', '#0f62fe'], final: ['MESTRE MULTI-CLOUD', 'sala final', '#e0a84f']
+};
+var CONCL = {
+  azure: ['LANDING ZONE PRONTA', 'todas as peças no lugar'], aws: ['BLACK FRIDAY VENCIDA', 'todas as ondas'],
+  gcp: ['RAG COMPLETO', 'todos os trechos entregues'], oracle: ['MANUTENÇÃO CONCLUÍDA', 'tablespaces coletados'],
+  ibm: ['SLO CUMPRIDO', 'dentro do orçamento de erros']
+};
+var SALAS = {};
+function entsDa(secao, tipo){ return E.ents.filter(function(e){ return e.secao === secao && e.tipo === tipo; }); }
+function pisoDe(secao){ var y = 0; M.fases.forEach(function(x){ if (x.el.id === secao) y = x.bottom - ALTURA_CHAO; }); return y; }
+function perto(e, k){ var r = 26 * k; return e.x > p.x - r && e.x < p.x + p.w + r && e.y > p.y - r && e.y < p.y + p.h + r; }
+
+function concluirSala(id){
+  if (E.nuvens[id]) return;
+  var k = M.esc / 3;
+  E.nuvens[id] = true; E.pontos += 500;
+  banner(CONCL[id][0], CONCL[id][1], 3, SALAS_INFO[id][2]); som.tocar('trofeu'); tremer(8);
+  faiscas(p.x + p.w / 2, p.y + p.h / 2, 30, SALAS_INFO[id][2], k);
+  ganhar(id); PV.contar('nuvem-' + id);
+  if (Object.keys(E.nuvens).length >= 5) { ganhar('multicloud'); E.finalEm = E.t + 3.5; }
+}
+
+/* Azure: monte a Landing Zone na ordem */
+function nomePeca(o){ var r = ''; entsDa('azure', 'peca').forEach(function(e){ if (e.ord === o) r = e.nome; }); return r; }
+SALAS.azure = {
+  ini: function(S){ S.prox = 1; S.total = 4; S.msgT = -9; entsDa('azure', 'peca').forEach(function(e){ e.vivo = true; }); dizer('monte a Landing Zone na ordem: 1 → 4', 6); },
+  hud: function(S){ return { txt: 'LANDING ZONE ' + (S.prox - 1) + '/' + S.total + (S.prox <= S.total ? ' · próximo: ' + nomePeca(S.prox) : ''), pct: (S.prox - 1) / S.total, cor: '#5aaaf0' }; }
+};
+
+/* AWS: Black Friday, ondas de tráfego e Auto Scaling */
+function spawnOnda(n, k){
+  var piso = pisoDe('aws'), qtd = 4 + n * 3;
+  for (var i = 0; i < qtd; i++) {
+    var lado = i % 2, w = 10 * M.esc, h = 9 * M.esc;
+    E.ents.push({ tipo: 'onda', dyn: true, vivo: true, oculto: false, secao: 'aws', x: lado ? M.W + 20 + i * 26 : -w - 20 - i * 26, y: piso - h, w: w, h: h, pisoY: piso, vel: 70 + n * 18 + rnd(0, 25), dir: lado ? -1 : 1 });
+  }
+}
+SALAS.aws = {
+  ini: function(S){
+    S.onda = 0; S.total = 3; S.espera = 2; S.aliados = 0; S.al = []; S.fim = false; S.tinha = 0;
+    E.ents = E.ents.filter(function(e){ return e.tipo !== 'onda'; });
+    entsDa('aws', 'ec2').forEach(function(e){ e.vivo = true; });
+    dizer('Black Friday: pegue as instâncias EC2 para chamar ajudantes', 6);
+  },
+  upd: function(S, dt, k){
+    var vivos = E.ents.filter(function(e){ return e.tipo === 'onda' && e.vivo; }).length;
+    if (!S.fim) {
+      if (S.tinha > 0 && vivos === 0) S.espera = 2;
+      S.tinha = vivos; S.espera -= dt;
+      if (vivos === 0 && S.espera <= 0) {
+        if (S.onda < S.total) { S.onda++; spawnOnda(S.onda, k); banner('ONDA ' + S.onda + '/' + S.total, 'tráfego chegando', 1.8, '#ff9900'); S.tinha = 1; }
+        else { S.fim = true; concluirSala('aws'); }
+      }
+    }
+    var piso = pisoDe('aws');
+    S.al.forEach(function(a, i){
+      a.x += ((p.x + p.w / 2 + (i - 1) * 46) - a.x) * Math.min(1, dt * 4); a.y = piso - 26 * k - Math.abs(Math.sin(E.t * 3 + i)) * 4;
+      a.t -= dt;
+      if (a.t <= 0) {
+        var alvo = null, dm = 520 * k;
+        E.ents.forEach(function(e){ if (e.tipo === 'onda' && e.vivo) { var d = Math.abs(e.x + e.w / 2 - a.x); if (d < dm) { dm = d; alvo = e; } } });
+        if (alvo) {
+          var dir = (alvo.x + alvo.w / 2) > a.x ? 1 : -1;
+          E.tiros.push({ x: a.x + dir * 12, y: a.y, vx: dir * 720 * k, r: 6 * k, c: 0, fura: false, v: 1, ang: 0 }); a.t = 0.75;
+        } else a.t = 0.2;
+      }
+    });
+  },
+  hud: function(S){
+    var vivos = E.ents.filter(function(e){ return e.tipo === 'onda' && e.vivo; }).length;
+    return { txt: 'ONDA ' + Math.max(1, S.onda) + '/' + S.total + ' · tráfego ' + vivos + ' · ajudantes ' + S.al.length, pct: S.onda / S.total, cor: '#ffb84d' };
+  }
+};
+
+/* GCP: pipeline RAG, junte os trechos e leve ao altar */
+function spawnAlucina(){
+  var f = null; M.fases.forEach(function(x){ if (x.el.id === 'gcp') f = x; }); if (!f) return;
+  E.ents.push({ tipo: 'alucina', dyn: true, vivo: true, oculto: false, secao: 'gcp', w: 10 * M.esc, h: 12 * M.esc, ph: rnd(0, 6),
+                x: rnd(40, M.W - 80), y: f.top + 140 + rnd(0, Math.max(60, f.bottom - f.top - 320)) });
+}
+function soltarTrechos(){
+  var S = E.sala; if (!S || S.id !== 'gcp' || !S.carre.length) return;
+  S.carre.forEach(function(e){ e.vivo = true; e.nopick = E.t + 1.2; });
+  texto(p.x + p.w / 2, p.y - 10, 'trechos corrompidos!', '#ff8fae', true); som.tocar('dano'); tremer(5); S.carre = [];
+}
+SALAS.gcp = {
+  ini: function(S){
+    S.carre = []; S.entregues = 0; S.respawn = 5;
+    E.ents = E.ents.filter(function(e){ return e.tipo !== 'alucina'; });
+    var ts = entsDa('gcp', 'trecho'); ts.forEach(function(e){ e.vivo = true; }); S.total = ts.length;
+    for (var i = 0; i < 3; i++) spawnAlucina();
+    dizer('junte os trechos e leve ao altar Vertex AI; cuidado com as alucinações', 6);
+  },
+  upd: function(S, dt){
+    var vivos = E.ents.filter(function(e){ return e.tipo === 'alucina' && e.vivo; }).length;
+    S.respawn -= dt;
+    if (vivos < 3 && S.respawn <= 0 && S.entregues < S.total) { spawnAlucina(); S.respawn = 6; }
+  },
+  hud: function(S){ return { txt: 'RAG ' + S.entregues + '/' + S.total + ' · carregando ' + S.carre.length, pct: S.entregues / S.total, cor: '#8ab4f8' }; }
+};
+
+/* Oracle: janela de manutenção, plataformas somem em ciclos */
+SALAS.oracle = {
+  ini: function(S){ S.n = 0; var its = entsDa('oracle', 'item'); its.forEach(function(e){ e.vivo = true; }); S.total = its.length; dizer('as plataformas somem em ciclos: colete os tablespaces', 6); },
+  hud: function(S){ return { txt: 'TABLESPACES ' + S.n + '/' + S.total, pct: S.n / S.total, cor: '#e58a7c' }; }
+};
+
+/* IBM Cloud: orçamento de erros (SRE) */
+function ibmFalha(deX, k){
+  var S = E.sala; S.budget--; p.invuln = 1.2; p.atordoado = 0.25;
+  var lado = p.x + p.w / 2 < deX ? -1 : 1; p.vx = lado * 300 * k; p.vy = -380 * k; sairDoChao(); p.socando = 0;
+  som.tocar('dano'); tremer(6); faiscas(p.x + p.w / 2, p.y + p.h / 2, 10, '#78a9ff', k);
+  if (S.budget <= 0) {
+    banner('SLO VIOLADO', 'recomeçando o percurso', 2, '#ff4d7e');
+    E.ents.forEach(function(e){ if (e.secao === 'ibm' && INIM[e.tipo]) { e.vivo = true; if (e.hpMax) e.hp = e.hpMax; } });
+    S.budget = S.max; teleportar(S.inicio.x, S.inicio.y);
+  } else dizer('falha! orçamento restante: ' + S.budget, 1.8);
+}
+SALAS.ibm = {
+  ini: function(S){ S.budget = 3; S.max = 3; S.inicio = { x: p.x, y: p.y }; dizer('SRE: você tem 3 falhas de orçamento. Chegue ao SLO!', 6); },
+  hud: function(S){ return { txt: 'ORÇAMENTO DE ERROS ' + new Array(S.budget + 1).join('■') + new Array(S.max - S.budget + 1).join('□'), pct: S.budget / S.max, cor: '#78a9ff' }; }
+};
+
+/* sala final: os cinco selos */
+SALAS.final = {
+  ini: function(S){ E.finalSelos = 0; entsDa('final', 'badge').forEach(function(e){ e.vivo = true; }); dizer('você dominou as 5 clouds! pegue os selos e saia pelo portal', 6); },
+  hud: function(S){ return { txt: 'SELOS MULTI-CLOUD ' + E.finalSelos + '/5', pct: E.finalSelos / 5, cor: '#ffd890' }; }
+};
+
+/* toque nas peças das salas (peça, altar, bandeira de SLO) */
+function tocarSala(e, k){
+  var S = E.sala; if (!S || !E.noBonus || !perto(e, k)) return;
+  if (e.tipo === 'peca') {
+    if (S.id !== 'azure') return;
+    if (e.ord === S.prox) {
+      e.vivo = false; S.prox++; E.pontos += 100; som.tocar('skill'); faiscas(e.x, e.y, 16, '#0078d4', k); texto(e.x, e.y - 14, '✔ ' + e.nome, '#5aaaf0', true);
+      if (S.prox > S.total) concluirSala('azure');
+    } else if (E.t - S.msgT > 1.3) { S.msgT = E.t; dizer('ordem errada: primeiro ' + nomePeca(S.prox), 2.2); som.tocar('dano'); tremer(3); }
+  } else if (e.tipo === 'altar') {
+    if (S.id !== 'gcp' || !S.carre.length) return;
+    S.entregues += S.carre.length; E.pontos += 100 * S.carre.length; som.tocar('skill'); faiscas(e.x, e.y, 18, '#4285f4', k);
+    texto(e.x, e.y - 16, '+' + S.carre.length + ' trecho(s)', '#8ab4f8', true); S.carre = [];
+    if (S.entregues >= S.total) concluirSala('gcp');
+  } else if (e.tipo === 'meta') {
+    if (S.id !== 'ibm' || S.budget <= 0) return;
+    e.vivo = false; concluirSala('ibm');
+  }
+}
+
+/* andamento das salas: regras próprias, plataformas "patch" e sala final */
+function atualizarSala(dt, k){
+  var S = E.sala;
+  if (S && E.noBonus && SALAS[S.id] && SALAS[S.id].upd) SALAS[S.id].upd(S, dt, k);
+  var ativo = !!(S && S.id === 'oracle' && E.noBonus);
+  M.patches.forEach(function(pl){
+    var off = false, aviso = false;
+    if (ativo) { var ph = (E.t * 1000 + pl.patch * 900) % 4200; off = ph > 2800; aviso = !off && ph > 2300; }
+    if (off !== !!pl.off || aviso !== !!pl.aviso) { pl.off = off; pl.aviso = aviso; pl.el.classList.toggle('patch-off', off); pl.el.classList.toggle('patch-aviso', aviso); }
+  });
+  if (E.finalEm && E.t > E.finalEm) { E.finalEm = 0; entrarBonus('final'); }
+}
+
 function entrarBonus(sala){
-  var id = sala === 'incidentes' ? 'incidentes' : 'bonus';
+  var id = (!sala || sala === 'badges') ? 'bonus' : sala;
   var f = null;
   M.fases.forEach(function(x){ if (x.bonus && x.el.id === id) f = x; });
   if (!f || !f.pouso) return;
   f.el.classList.add('revelada');
-  E.retorno = { x: p.x, y: p.y }; E.noBonus = true; E.bolas = [];
-  if (!E.salas[id]) { E.salas[id] = true; E.pontos += 1000; }
+  if (!E.noBonus) E.retorno = { x: p.x, y: p.y };
+  E.noBonus = true; E.bolas = [];
+  if (!E.salas[id]) { E.salas[id] = true; E.pontos += (id === 'bonus' || id === 'incidentes') ? 1000 : 300; }
   E.segredo = true; ganhar('segredo'); som.tocar('portal'); PV.contar('sala-' + id);
   teleportar(f.pouso.x + f.pouso.w * 0.3, f.pouso.y - p.h - 4);
-  if (id === 'incidentes') { banner('CENTRAL DE INCIDENTES', 'plantão iniciado', 2.4, '#ff4d7e'); iniciarPlantao(); }
-  else { banner('SALA SECRETA', 'SALA DE SERVIDORES', 2.4, '#9b5cff'); dizer('saia pelo portal SAÍDA', 6); }
+  var inf = SALAS_INFO[id]; banner(inf[0], inf[1], 2.4, inf[2]);
+  E.sala = SALAS[id] ? { id: id } : null;
+  if (id === 'incidentes') iniciarPlantao();
+  else if (id === 'bonus') dizer('saia pelo portal SAÍDA', 6);
+  if (E.sala) SALAS[id].ini(E.sala);
 }
 function sairBonus(){
   E.noBonus = false; som.tocar('portal');
   if (E.inc.on) { E.inc.on = false; E.inc.lista.forEach(function(a){ a.ativo = false; }); }
+  E.sala = null;
   var r = E.retorno || { x: 60, y: 0 };
   teleportar(r.x, r.y);
 }
@@ -840,6 +1032,14 @@ function atualizarEntidades(dt, k){
       e.ciclo += dt;
       if (e.quebra > 0) e.quebra -= dt; else if (e.ciclo > 2.8) { e.ciclo = 0; e.quebra = 0.5; }
       patrulhar(e, dt, k, e.quebra > 0);
+    } else if (e.tipo === 'onda') {
+      var alvoX = p.x + p.w / 2, cxe = e.x + e.w / 2;
+      e.x += (alvoX > cxe ? 1 : -1) * e.vel * k * dt; e.y = e.pisoY - e.h;
+    } else if (e.tipo === 'alucina') {
+      if (E.sala && E.sala.id === 'gcp' && E.noBonus) {
+        var ddx = (p.x + p.w / 2) - (e.x + e.w / 2), ddy = (p.y + p.h / 2) - (e.y + e.h / 2), dd = Math.sqrt(ddx * ddx + ddy * ddy) || 1;
+        e.x += ddx / dd * 58 * k * dt + Math.sin(E.t * 2 + e.ph) * 22 * k * dt; e.y += ddy / dd * 58 * k * dt;
+      }
     } else if (e.tipo === 'glitch' || e.tipo === 'vaza') {
       e.x = e.cx + Math.sin(E.t * 0.8 + e.ph) * e.ax - e.w / 2;
       e.y = e.cy + Math.sin(E.t * 1.9 + e.ph * 1.3) * 26 * k - e.h / 2;
@@ -858,7 +1058,7 @@ function matarInimigo(e, k){
   e.vivo = false; E.bugs++;
   var mult = Math.max(1, E.combo), pts = 50 * mult;
   E.pontos += pts; som.tocar('esmaga', E.combo);
-  var cor = { bug: '#ff4d7e', crash: '#4aa3ff', vaza: '#e0a84f', fatura: '#34d399' }[e.tipo] || '#9b5cff';
+  var cor = { bug: '#ff4d7e', crash: '#4aa3ff', vaza: '#e0a84f', fatura: '#34d399', onda: '#ff9900', alucina: '#8ab4f8' }[e.tipo] || '#9b5cff';
   for (var i = 0; i < 14; i++) particula(e.x + e.w / 2, e.y + e.h / 2, rnd(-300, 300) * k, rnd(-420, -60) * k, rnd(.35, .7), i % 4 ? cor : '#fff', rnd(3, 6) * k, 1200 * k);
   texto(e.x + e.w / 2, e.y - 4, '+' + pts + (mult > 1 ? '  x' + mult : ''), mult > 1 ? '#e0a84f' : '#eaf1f5');
   tremer(5);
@@ -916,7 +1116,27 @@ function coletar(e, k){
       texto(e.x, e.y - 14, '✔ ' + e.nome, '#8dffc9', true);
       if (E.etapas >= E.etapasTotal) { E.pontos += 300; banner('PIPELINE VERDE', 'todas as etapas passaram', 2.6, '#34d399'); som.tocar('trofeu'); ganhar('pipeline'); }
       break;
+    case 'ec2':
+      if (E.sala && E.sala.id === 'aws' && E.sala.al.length < 3) {
+        E.sala.al.push({ x: p.x, y: pisoDe('aws') - 26 * k, t: 0.3 }); E.sala.aliados = E.sala.al.length;
+        som.tocar('escudo'); faiscas(e.x, e.y, 14, '#ff9900', k); texto(e.x, e.y - 14, '+ EC2 (ajudante)', '#ffb84d', true);
+      }
+      break;
+    case 'trecho':
+      if (E.sala && E.sala.id === 'gcp') { E.sala.carre.push(e); som.tocar('etapa'); faiscas(e.x, e.y, 10, '#4285f4', k); texto(e.x, e.y - 14, '+ ' + e.nome, '#8ab4f8', true); }
+      break;
+    case 'item':
+      if (E.sala && E.sala.id === e.sala) {
+        E.sala.n++; E.pontos += 100; som.tocar('skill'); faiscas(e.x, e.y, 14, '#c74634', k); texto(e.x, e.y - 14, '+ ' + e.nome, '#e58a7c', true);
+        if (E.sala.n >= E.sala.total) concluirSala(e.sala);
+      }
+      break;
     case 'badge':
+      if (e.grupo === 'final') {
+        E.finalSelos++; E.pontos += 200; som.tocar('skill'); faiscas(e.x, e.y, 16, '#e0a84f', k); texto(e.x, e.y - 14, '+ ' + e.nome, '#ffd890', true);
+        if (E.finalSelos >= 5) { banner('MESTRE MULTI-CLOUD', 'os 5 selos coletados', 2.6, '#e0a84f'); som.tocar('trofeu'); }
+        break;
+      }
       E.badges++; E.pontos += 150; som.tocar('skill');
       faiscas(e.x, e.y, 16, '#35d0e5', k); texto(e.x, e.y - 14, '+ ' + e.nome, '#c9f6fc', true);
       if (E.badges >= E.badgesTotal) { banner('SELOS', E.badges + '/' + E.badgesTotal, 2.2, '#35d0e5'); ganhar('badges'); }
@@ -940,13 +1160,15 @@ function colisoes(k){
           danoEnt(e, p.socando === 2 ? 2 : 1, k);
           if (p.socando !== 2 && p.dashT <= 0) { p.vy = -(inp.pulo ? C.quiqueAlto : C.quique) * k; p.quicando = true; p.pulosAr = 1; p.giro = 0; }
         } else if (p.invuln <= 0) {
-          machucar(e.x + e.w / 2, k);
-          if (modo !== 'jogando') return;
+          if (e.tipo === 'alucina') { soltarTrechos(); e.vivo = false; faiscas(e.x + e.w / 2, e.y + e.h / 2, 12, '#8ab4f8', k); p.invuln = 0.8; }
+          else { machucar(e.x + e.w / 2, k); if (modo !== 'jogando') return; }
         }
       }
     } else {
       if (E.tour && (e.tipo === 'segredo' || e.tipo === 'portal' || e.tipo === 'alerta')) continue;
       if (e.tipo === 'alerta' && !e.ativo) continue;
+      if (e.nopick && E.t < e.nopick) continue;
+      if (e.tipo === 'peca' || e.tipo === 'altar' || e.tipo === 'meta') { tocarSala(e, k); continue; }
       var r = (e.tipo === 'bit' ? 16 : 26) * k;
       if (e.x > x0 - r && e.x < x1 + r && e.y > y0 - r && e.y < y1 + r) coletar(e, k);
     }
@@ -968,7 +1190,7 @@ function acompanharFase(){
 }
 
 function tutorial(){
-  if (E.terminou && E.faseAtual === M.ultima && !E.noBonus && !(E.salas.bonus && E.salas.incidentes)) { dizer('fim da linha! Há salas secretas escondidas: procure os blocos ? e !', 9999); return; }
+  if (E.terminou && E.faseAtual === M.ultima && !E.noBonus && Object.keys(E.salas).length < 7) { dizer('fim da linha! Há salas secretas escondidas: procure os blocos ? e !', 9999); return; }
   if (E.speed || E.tour || E.faseMax > 0) return;
   if (!E.tut.andou) dizer('← → andam · espaço pula', 9999);
   else if (!E.tut.pulou2 && E.t < 12) dizer('espaço de novo no ar: pulo duplo', 9999);
@@ -1017,6 +1239,7 @@ function passo(dt){
     atualizarBoss(dt, k);
     atualizarBolas(dt, k);
     atualizarPlantao(dt);
+    atualizarSala(dt, k);
     colisoes(k);
     E.reiki = Math.min(100, E.reiki + (p.mirando ? 0 : 18) * dt);
     if (p.poseT > 0) p.poseT -= dt;
@@ -1140,15 +1363,42 @@ function desenharEntidades(topo, base){
         chip(e.x, e.y, '⚠ ' + e.sev + ' ' + alertaNome(e), '#ff4d7e', 'rgba(255,77,126,' + (0.18 + 0.22 * pul) + ')', s, abz);
         break; }
       case 'segredo': {
-        var rojo = e.sala === 'incidentes', cor1 = rojo ? '255,77,126' : '224,168,79', cor2 = rojo ? '#ff4d7e' : '#e0a84f';
+        var SC = SEG_COR[e.sala] || SEG_COR.badges, cor1 = SC[0], cor2 = SC[1];
         var bz = Math.sin(t * 3) * 5, sz = 34 * (s / 3);
         var gs = cx.createRadialGradient(e.x, e.y + bz, 0, e.x, e.y + bz, sz * 1.8);
         gs.addColorStop(0, 'rgba(' + cor1 + ',.45)'); gs.addColorStop(1, 'rgba(' + cor1 + ',0)');
         cx.fillStyle = gs; cx.beginPath(); cx.arc(e.x, e.y + bz, sz * 1.8, 0, 7); cx.fill();
         cx.fillStyle = cor2; cx.fillRect(e.x - sz / 2, e.y + bz - sz / 2, sz, sz);
-        cx.strokeStyle = rojo ? '#7a1830' : '#7a4f1a'; cx.lineWidth = 3; cx.strokeRect(e.x - sz / 2, e.y + bz - sz / 2, sz, sz);
+        cx.strokeStyle = SC[2]; cx.lineWidth = 3; cx.strokeRect(e.x - sz / 2, e.y + bz - sz / 2, sz, sz);
         cx.fillStyle = '#fff0c4'; cx.font = '700 ' + 22 * (s / 3) + 'px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
-        cx.fillText(rojo ? '!' : '?', e.x, e.y + bz + 2); break; }
+        cx.fillText(SC[3], e.x, e.y + bz + 2); break; }
+      case 'peca': chip(e.x, e.y, e.ord + ' ' + e.nome, '#5aaaf0', 'rgba(0,120,212,.22)', s, Math.sin(t * 3 + e.ord) * 4); break;
+      case 'ec2': {
+        var ez2 = Math.sin(t * 3 + e.x * 0.01) * 4, sq = 16 * (s / 3);
+        cx.fillStyle = '#ff9900'; cx.fillRect(e.x - sq, e.y - sq + ez2, sq * 2, sq * 2); cx.strokeStyle = '#7a4a00'; cx.lineWidth = 3; cx.strokeRect(e.x - sq, e.y - sq + ez2, sq * 2, sq * 2);
+        cx.fillStyle = '#1b1004'; cx.font = '700 ' + 11 * (s / 3) + 'px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText('EC2', e.x, e.y + ez2 + 1); break; }
+      case 'trecho': chip(e.x, e.y, e.nome, '#8ab4f8', 'rgba(66,133,244,.2)', s, Math.sin(t * 3 + e.x * 0.01) * 4); break;
+      case 'altar': {
+        var az = Math.sin(t * 2) * 3, ar = 30 * (s / 3), ga = cx.createRadialGradient(e.x, e.y + az, 0, e.x, e.y + az, ar * 1.8);
+        ga.addColorStop(0, 'rgba(66,133,244,.55)'); ga.addColorStop(1, 'rgba(66,133,244,0)');
+        cx.fillStyle = ga; cx.beginPath(); cx.arc(e.x, e.y + az, ar * 1.8, 0, 7); cx.fill();
+        chip(e.x, e.y, 'VERTEX AI', '#8ab4f8', 'rgba(66,133,244,.3)', s, az); break; }
+      case 'item': chip(e.x, e.y, '◆ ' + e.nome, '#e58a7c', 'rgba(199,70,52,.2)', s, Math.sin(t * 3 + e.x * 0.01) * 4); break;
+      case 'meta': {
+        var mh = 64 * (s / 3);
+        cx.strokeStyle = '#78a9ff'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(e.x, e.y + mh * 0.6); cx.lineTo(e.x, e.y - mh * 0.6); cx.stroke();
+        cx.fillStyle = '#0f62fe'; cx.beginPath(); cx.moveTo(e.x, e.y - mh * 0.6); cx.lineTo(e.x + 34 * (s / 3), e.y - mh * 0.4 + Math.sin(t * 5) * 3); cx.lineTo(e.x, e.y - mh * 0.2); cx.fill();
+        cx.fillStyle = '#fff'; cx.font = '700 ' + 9 * (s / 3) + 'px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText('SLO', e.x + 12 * (s / 3), e.y - mh * 0.4 + 1); break; }
+      case 'onda': {
+        cx.save(); cx.translate(e.x + e.w / 2, e.y + e.h / 2); cx.scale((p.x + p.w / 2) > (e.x + e.w / 2) ? 1 : -1, 1); cx.translate(-e.w / 2, -e.h / 2);
+        mapa(BUG, 0, Math.sin(t * 14 + e.x) > 0 ? 0 : -1, s * 0.8, { R: '#ff9900', V: '#b36b00', W: '#fff' }); cx.restore(); break; }
+      case 'alucina': {
+        var wob = Math.sin(t * 5 + e.ph) * 3, ghx = e.x + e.w / 2, ghy = e.y + e.h / 2 + wob;
+        cx.globalAlpha = 0.85; cx.fillStyle = '#d7e3ff'; cx.beginPath(); cx.arc(ghx, ghy - e.h * 0.1, e.w * 0.5, Math.PI, 0); cx.lineTo(ghx + e.w * 0.5, ghy + e.h * 0.5);
+        for (var gz = 4; gz >= 0; gz--) cx.lineTo(ghx - e.w * 0.5 + gz * (e.w / 4), ghy + e.h * 0.5 + (gz % 2 ? -4 : 3)); cx.closePath(); cx.fill(); cx.globalAlpha = 1;
+        cx.fillStyle = '#1a2a55'; cx.fillRect(ghx - e.w * 0.28, ghy - e.h * 0.2, 4, 6); cx.fillRect(ghx + e.w * 0.12, ghy - e.h * 0.2, 4, 6);
+        if (e.flash > 0) { cx.globalAlpha = .6; cx.fillStyle = '#fff'; cx.fillRect(e.x, e.y, e.w, e.h); cx.globalAlpha = 1; }
+        break; }
       case 'bug': {
         cx.save(); cx.translate(e.x + e.w / 2, e.y + e.h / 2); cx.scale(e.dir, 1); cx.translate(-e.w / 2, -e.h / 2);
         mapa(BUG, 0, Math.sin(t * 12) > 0 ? 0 : -1, s); cx.restore(); break; }
@@ -1218,6 +1468,13 @@ function desenharMundo(){
   desenharEntidades(topo, base);
   desenharBoss();
   var i;
+  if (E.sala && E.sala.id === 'aws' && E.sala.al) {
+    E.sala.al.forEach(function(a){
+      var sq = 9 * (M.esc / 3);
+      cx.fillStyle = '#ff9900'; cx.fillRect(a.x - sq, a.y - sq, sq * 2, sq * 2); cx.strokeStyle = '#7a4a00'; cx.lineWidth = 2; cx.strokeRect(a.x - sq, a.y - sq, sq * 2, sq * 2);
+      cx.fillStyle = '#1b1004'; cx.font = '700 7px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText('EC2', a.x, a.y + 1);
+    });
+  }
   for (i = 0; i < E.aneis.length; i++) { var a = E.aneis[i], u = 1 - a.v / a.m; cx.strokeStyle = a.cor; cx.globalAlpha = 1 - u; cx.lineWidth = a.l; cx.beginPath(); cx.arc(a.x, a.y, a.r * (0.3 + u), 0, 7); cx.stroke(); }
   cx.globalAlpha = 1;
   for (i = 0; i < E.tiros.length; i++) {
@@ -1308,6 +1565,15 @@ function desenharHUD(){
     if (al3.y < syv + 110) textoPixel('▲', clamp(al3.x, 20, W - 20), y0 + 96, '#ff4d7e', 22, 'center');
     else if (al3.y > syv + H - 110) textoPixel('▼', clamp(al3.x, 20, W - 20), H - (TOQUE ? 130 : 60), '#ff4d7e', 22, 'center');
   }
+  var SL = E.sala;
+  if (SL && E.noBonus && SALAS[SL.id] && SALAS[SL.id].hud) {
+    var hh = SALAS[SL.id].hud(SL), hw = Math.min(360, W - 40), hx = W / 2 - hw / 2, hy = compacto ? y0 + 70 : y0 + 22;
+    if (hh.pct !== undefined) {
+      cx.fillStyle = '#0b1828'; cx.fillRect(hx, hy, hw, 10); cx.fillStyle = hh.cor || '#35d0e5'; cx.fillRect(hx, hy, hw * clamp(hh.pct, 0, 1), 10);
+      cx.strokeStyle = '#fff'; cx.lineWidth = 1; cx.strokeRect(hx, hy, hw, 10);
+    }
+    textoPixel(hh.txt, W / 2, hy - 10, hh.cor || '#c9f6fc', 11, 'center');
+  }
   var TB = E.tour;
   if (TB && TB.texto) {
     var txb = I18N.t(TB.texto), bw2 = Math.min(580, W - 24);
@@ -1359,7 +1625,14 @@ var TEMAS = [
   { c: ['#1a1206', '#40300f'], cam: ['estrelas', 'aurora'] },              // 6 certificações: aurora dourada
   { c: ['#0b1f2a', '#1a4a66'], cam: ['nuvens', 'montanhas'] },             // 7 formação: manhã
   { c: ['#1b0f1e', '#6a2f42'], cam: ['sol', 'cidade'] },                   // 8 contato: amanhecer
-  { c: ['#10061c', '#2a0f45'], cam: ['servidores', 'matrix'] }             // 9 sala secreta
+  { c: ['#10061c', '#2a0f45'], cam: ['servidores', 'matrix'] },            // 9 sala secreta
+  { c: ['#10061c', '#2a0f45'], cam: ['servidores', 'matrix'] },            // 10 incidentes
+  { c: ['#031a38', '#0a3d7a'], cam: ['nuvens', 'estrelas'] },              // 11 azure
+  { c: ['#1a0f02', '#4a2a05'], cam: ['estrelas', 'servidores'] },          // 12 aws
+  { c: ['#0c0f1a', '#1b2a4a'], cam: ['aurora', 'estrelas'] },              // 13 gcp
+  { c: ['#1a0505', '#4a1010'], cam: ['cidade', 'estrelas'] },              // 14 oracle
+  { c: ['#050d1f', '#0b2a5c'], cam: ['matrix', 'montanhas'] },             // 15 ibm
+  { c: ['#0e0a1f', '#3a1d5e'], cam: ['aurora', 'sol', 'estrelas'] }        // 16 final
 ];
 var ORDEM = ['estrelas', 'aurora', 'sol', 'nuvens', 'montanhas', 'cidade', 'matrix', 'servidores'];
 function hexRgb(h){ return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
@@ -1557,7 +1830,7 @@ function novaPartida(tipo){
     if (e.tipo === 'skill') E.skillsTotal++;
     if (e.tipo === 'trofeu') E.trofeusTotal++;
     if (e.tipo === 'etapa') E.etapasTotal++;
-    if (e.tipo === 'badge') E.badgesTotal++;
+    if (e.tipo === 'badge' && !e.grupo) E.badgesTotal++;
   });
   p.vidas = 3; p.invuln = 0; p.vx = p.vy = 0; p.oculto = false; p.socando = 0; p.giro = 0; p.chao = null; p.ignorar = null; p.dashT = 0;
   var pl = M.fases[0].pouso;
