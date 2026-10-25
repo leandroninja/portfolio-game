@@ -65,6 +65,7 @@ PV.i18n = (function(){
     ['SLO VIOLADO', 'SLO BREACHED'], ['recomeçando o percurso', 'restarting the course'], ['SRE: você tem 3 falhas de orçamento. Chegue ao SLO!', 'SRE: you have 3 failures of budget. Reach the SLO!'],
     ['falha! orçamento restante: ', 'failure! budget left: '], ['sala final', 'final room'],
     ['você dominou as 5 clouds! pegue os selos e saia pelo portal', 'you mastered all 5 clouds! grab the seals and take the portal'],
+    ['🔇 Mutar', '🔇 Mute'], ['🔊 Ativar som', '🔊 Sound on'],
     ['sem pausa no speedrun', 'no pausing in speedrun'], ['sem terminal no speedrun', 'no terminal in speedrun']
   ].sort(function(a, b){ return b[0].length - a[0].length; });
 

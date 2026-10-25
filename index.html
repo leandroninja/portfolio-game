@@ -41,7 +41,7 @@
     <a href="#formacao" data-en="Education">Formação</a><a href="#contato" data-en="Contact">Contato</a>
   </nav>
   <button class="mini-btn" type="button" id="btnIdioma" data-acao="idioma" title="Language / Idioma">EN</button>
-  <button class="mini-btn" type="button" id="btnSom" data-acao="som" title="Som / Sound">♪</button>
+  <button class="mini-btn" type="button" id="btnSom" data-acao="volume" title="Volume / Sound">♪</button>
   <button class="botao-pixel mini" type="button" data-acao="jogar"><span class="rotulo-jogar">▶ Jogar</span></button>
   <div class="progresso" id="progresso"></div>
 </header>
@@ -409,6 +409,11 @@
 
 </main>
 
+<div id="volpop" class="volpop" hidden>
+  <label><span data-en="MUSIC">MÚSICA</span><input type="range" id="volMus" min="0" max="100" step="5"></label>
+  <label><span data-en="EFFECTS">EFEITOS</span><input type="range" id="volEfe" min="0" max="100" step="5"></label>
+  <button type="button" class="botao-linha" id="volMudo" data-acao="som">🔇 Mutar</button>
+</div>
 <div id="painel" class="painel" hidden></div>
 <div id="pad" aria-hidden="true">
   <div><button data-k="esq">◀</button><button data-k="dir">▶</button></div>

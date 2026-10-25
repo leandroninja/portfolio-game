@@ -244,3 +244,11 @@ kbd{font-family:var(--f-pixel);font-size:11px;background:#10233a;border:1px soli
 .nav.com-contador .marca{margin-right:14px}
 .nav .contador{margin-right:auto}
 .contador-rodape{margin-top:12px}
+
+/* ---------- volume ---------- */
+.volpop{position:fixed;top:calc(var(--nav-h) + 8px);right:12px;width:250px;z-index:65;background:var(--cartao-a);border:2px solid var(--ciano);box-shadow:5px 5px 0 var(--ciano-escuro);padding:14px;display:flex;flex-direction:column;gap:12px}
+.volpop[hidden]{display:none}
+.volpop label{display:flex;flex-direction:column;gap:6px}
+.volpop label span{font-family:var(--f-pixel);font-size:10px;letter-spacing:.14em;color:var(--texto-2)}
+.volpop input[type=range]{width:100%;accent-color:var(--ciano);height:26px}
+.volpop .botao-linha{font-size:11px;padding:9px 12px 7px}

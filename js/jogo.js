@@ -1799,8 +1799,20 @@ function aplicarIdioma(){
 }
 function alternarIdioma(){ I18N.set(I18N.lang === 'en' ? 'pt' : 'en'); aplicarIdioma(); PV.contar('idioma-' + I18N.lang); }
 
+function atualizarVolUI(){
+  var on = som.ligado(), m = $('#volMus'), e = $('#volEfe'), b = $('#btnSom'), mu = $('#volMudo');
+  if (m) m.value = som.volume('musica');
+  if (e) e.value = som.volume('efeitos');
+  if (b) b.style.opacity = on ? 1 : 0.4;
+  if (mu) mu.textContent = tr(on ? '🔇 Mutar' : '🔊 Ativar som');
+}
+function alternarPopVolume(){
+  var pv = $('#volpop'); pv.hidden = !pv.hidden;
+  if (!pv.hidden) { som.acordar(); atualizarVolUI(); }
+}
 function alternarSom(){
   var on = som.alternar(), b = $('#btnSom');
+  atualizarVolUI();
   if (b) b.style.opacity = on ? 1 : 0.4;
   if (E && modo !== 'menu') dizer(on ? 'som ligado' : 'som desligado', 1.2);
 }
@@ -1989,6 +2001,8 @@ function termEnviar(){
 
 /* ---------- eventos ---------- */
 document.addEventListener('click', function(ev){
+  var vp = $('#volpop');
+  if (vp && !vp.hidden && !ev.target.closest('#volpop') && !ev.target.closest('#btnSom')) vp.hidden = true;
   var cv = ev.target.closest('[data-cv]');
   if (cv) { PV.contar('curriculo-' + cv.dataset.cv); PV.conquistas.desbloquear('curriculo'); return; }
   var b = ev.target.closest('[data-acao]'); if (!b) return;
@@ -2007,10 +2021,12 @@ document.addEventListener('click', function(ev){
   else if (a === 'skin') { if (PV.skins.usar(b.dataset.id)) abrirSkins(); }
   else if (a === 'idioma') alternarIdioma();
   else if (a === 'som') alternarSom();
+  else if (a === 'volume') alternarPopVolume();
   else if (a === 'fechar') fecharSub();
 });
 
 addEventListener('keydown', function(e){
+  if (e.code === 'Escape' && $('#volpop') && !$('#volpop').hidden) { $('#volpop').hidden = true; if (document.activeElement) document.activeElement.blur(); return; }
   if (e.target && e.target.tagName === 'INPUT') {
     if (e.target.id === 'termIn') {
       if (e.code === 'Enter') { e.preventDefault(); termEnviar(); }
@@ -2109,6 +2125,12 @@ M.preparar();
 redimensionarCanvas();
 aplicarIdioma();
 var bs = $('#btnSom'); if (bs) bs.style.opacity = som.ligado() ? 1 : 0.4;
+(function(){
+  var vm = $('#volMus'), ve = $('#volEfe');
+  if (vm) { vm.addEventListener('input', function(){ som.definirVolume('musica', +vm.value); atualizarVolUI(); }); vm.addEventListener('change', function(){ som.demoMusica(); vm.blur(); }); }
+  if (ve) { ve.addEventListener('input', function(){ som.definirVolume('efeitos', +ve.value); atualizarVolUI(); }); ve.addEventListener('change', function(){ som.tocar('skill'); ve.blur(); }); }
+  atualizarVolUI();
+})();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ M.medir(); if (modo !== 'menu') remedir(); });
 window.addEventListener('load', function(){ M.medir(); });
 requestAnimationFrame(laco);

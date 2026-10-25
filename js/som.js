@@ -6,15 +6,32 @@ window.PV = window.PV || {};
 
 PV.som = (function(){
   'use strict';
-  var ac = null, ligado = true;
+  var ac = null, ligado = true, nos = null;
+  var vol = { musica: 70, efeitos: 80 };              // 0 a 100 (escolha do usuário)
+  var AMP_M = 7, AMP_E = 8;                           // amplificação: os sons-base são suaves, o compressor evita estourar
   try { if (localStorage.getItem('pv-mudo') === '1') ligado = false; } catch (e) {}
+  try { var vs = JSON.parse(localStorage.getItem('pv-vol') || 'null'); if (vs) { vol.musica = +vs.musica; vol.efeitos = +vs.efeitos; } } catch (e) {}
 
   function ctx(){
     if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+    if (ac && !nos) montar(ac);
     if (ac && ac.state === 'suspended') ac.resume();
     return ac;
   }
-  function osc(f, d, tipo, vol, t0, ate){
+  function montar(a){
+    var comp = a.createDynamicsCompressor();
+    comp.threshold.value = -16; comp.knee.value = 18; comp.ratio.value = 6; comp.attack.value = 0.003; comp.release.value = 0.2;
+    var mestre = a.createGain(), gm = a.createGain(), ge = a.createGain();
+    gm.connect(mestre); ge.connect(mestre); mestre.connect(comp); comp.connect(a.destination);
+    nos = { gm: gm, ge: ge };
+    aplicar();
+  }
+  function aplicar(){
+    if (!nos) return;
+    nos.gm.gain.value = (vol.musica / 100) * AMP_M;
+    nos.ge.gain.value = (vol.efeitos / 100) * AMP_E;
+  }
+  function osc(f, d, tipo, vol, t0, ate, bus){
     var a = ctx(); if (!a) return;
     var o = a.createOscillator(), g = a.createGain();
     o.type = tipo || 'square';
@@ -22,7 +39,7 @@ PV.som = (function(){
     if (ate) o.frequency.exponentialRampToValueAtTime(Math.max(30, ate), t0 + d);
     g.gain.setValueAtTime(vol || 0.05, t0);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
-    o.connect(g); g.connect(a.destination); o.start(t0); o.stop(t0 + d + 0.03);
+    o.connect(g); g.connect(bus || (nos && nos.ge) || a.destination); o.start(t0); o.stop(t0 + d + 0.03);
   }
   function nota(f, d, tipo, vol, atraso, ate){
     var a = ctx(); if (!a || !ligado) return;
@@ -70,13 +87,13 @@ PV.som = (function(){
   function hat(a, t, vol){
     var s = a.createBufferSource(), g = a.createGain();
     s.buffer = bufRuido(a); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
-    s.connect(g); g.connect(a.destination); s.start(t);
+    s.connect(g); g.connect(nos.gm); s.start(t);
   }
   function tocarPasso(a, t, i, dur){
     var ac_ = ACORDES[Math.floor(i / 8)], k = PADRAO[i % 8], tr = mus.modo === 'boss' ? 2 : 0;
-    osc(freq(ac_[k] + 12 + tr), dur * 1.4, 'square', 0.016, t);
-    if (i % 2 === 0) osc(freq(ac_[0] - 12 + tr), dur * 1.8, 'triangle', 0.034, t);
-    if (i % 4 === 0) osc(120, 0.09, 'triangle', 0.05, t, 45);
+    osc(freq(ac_[k] + 12 + tr), dur * 1.4, 'square', 0.016, t, undefined, nos.gm);
+    if (i % 2 === 0) osc(freq(ac_[0] - 12 + tr), dur * 1.8, 'triangle', 0.034, t, undefined, nos.gm);
+    if (i % 4 === 0) osc(120, 0.09, 'triangle', 0.05, t, 45, nos.gm);
     if (i % 4 === 2) hat(a, t, 0.018);
     if (mus.modo === 'boss' && i % 2 === 1) hat(a, t, 0.012);
   }
@@ -98,6 +115,21 @@ PV.som = (function(){
       return ligado;
     },
     ligado: function(){ return ligado; },
+    volume: function(tipo){ return vol[tipo]; },
+    definirVolume: function(tipo, v){
+      vol[tipo] = Math.max(0, Math.min(100, Math.round(v)));
+      try { localStorage.setItem('pv-vol', JSON.stringify(vol)); } catch (e) {}
+      aplicar();
+      if (vol[tipo] > 0 && !ligado) { ligado = true; try { localStorage.setItem('pv-mudo', '0'); } catch (e) {} }
+    },
+    demoMusica: function(){
+      var a = ctx(); if (!a || !ligado) return;
+      var t0 = a.currentTime + 0.03;
+      [0, 3, 7, 12].forEach(function(n, i){
+        osc(freq(n + 12), 0.2, 'square', 0.016, t0 + i * 0.12, undefined, nos.gm);
+        osc(freq(n - 12), 0.24, 'triangle', 0.034, t0 + i * 0.12, undefined, nos.gm);
+      });
+    },
     acordar: ctx,
     musica: {
       iniciar: function(modo){
