@@ -44,6 +44,7 @@ PV.i18n = (function(){
     ['ESCUDO', 'SHIELD'], ['escudo Terraform!', 'Terraform shield!'], ['o escudo absorveu o golpe!', 'the shield absorbed the hit!'],
     ['PIPELINE VERDE', 'GREEN PIPELINE'], ['todas as etapas passaram', 'all stages passed'],
     ['SALA DE SERVIDORES', 'SERVER ROOM'], ['saia pelo portal SAÍDA', 'leave through the EXIT portal'], ['SAÍDA', 'EXIT'],
+    ['GIRE O CELULAR', 'ROTATE YOUR PHONE'], ['para jogar melhor', 'for a better experience'],
     ['sem pausa no speedrun', 'no pausing in speedrun'], ['sem terminal no speedrun', 'no terminal in speedrun']
   ].sort(function(a, b){ return b[0].length - a[0].length; });
 

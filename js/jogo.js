@@ -28,6 +28,7 @@ function tempo(s){ return dois(Math.floor(s / 60)) + ':' + dois(Math.floor(s % 6
 function tempoMs(s){ return tempo(s) + '.' + dois(Math.floor((s % 1) * 100)); }
 function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 var reduzido = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+var TOQUE = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);   // celular/tablet: só afeta o layout de toque
 
 /* ---------------- canvas ---------------- */
 var cv = $('#jogo'), cx = cv.getContext('2d');
@@ -150,7 +151,7 @@ M.preparar = function(){ $$('[data-letras]').forEach(separarLetras); };
 M.medir = function(){
   M.W = root.clientWidth;
   M.H = root.scrollHeight;
-  M.esc = M.W < 720 ? 2 : 3;
+  M.esc = 3;
   M.plats = []; M.porEl = new Map(); M.titulos = [];
 
   $$('[data-plat]').forEach(function(el){
@@ -1137,28 +1138,41 @@ function textoPixel(txt, x, y, cor, tam, alinha){
 }
 
 function desenharHUD(){
+  var compacto = W < 720;
   var y0 = 60 + 24, x0 = 16, s = 3, i;
   if (E.flash > 0) { cx.fillStyle = 'rgba(255,255,255,' + E.flash * 0.7 + ')'; cx.fillRect(0, 0, W, H); }
   for (i = 0; i < 3; i++) mapa(CORACAO, x0 + i * 28, y0 - 9, s, i < p.vidas ? null : { H: '#24364b' });
   var x = x0 + 100;
-  mapa(BIT, x, y0 - 8, 3); textoPixel(E.bits + '/' + E.bitsTotal, x + 22, y0, '#c9f6fc', 13);
-  x += 100; textoPixel('★ ' + E.skills.length + '/' + E.skillsTotal, x, y0, '#ffd890', 13);
-  x += 90; textoPixel('🏆 ' + E.trofeus.length + '/' + E.trofeusTotal, x, y0, '#e0a84f', 13);
-  x += 90; textoPixel(E.speed ? tempoMs(E.crono) : tempo(E.crono), x, y0, E.speed ? '#ffd890' : '#eaf1f5', 13);
-  if (E.escudo > 0) textoPixel('⬢ ESCUDO', x + 95, y0, '#d2b4ff', 12);
-  textoPixel(String(E.pontos).padStart(6, '0') + ' pts', W - 16, y0, '#eaf1f5', 13, 'right');
   var nomeFase = E.faseAtual > M.ultima ? 'SALA SECRETA' : 'FASE ' + E.faseAtual + '/' + M.ultima + ' · ' + M.fases[E.faseAtual].nome.toUpperCase();
-  textoPixel(nomeFase, W - 16, y0 + 20, E.faseAtual > M.ultima ? '#c9a8ff' : '#6a8294', 11, 'right');
-  if (E.speed) textoPixel('SPEEDRUN', W / 2, y0 - 2, '#ffd890', 12, 'center');
-  textoPixel('P pausa · M som · X rei gun · Shift dash', x0, H - 16, '#6a8294', 10);
-  var by = H - 38;
+  if (compacto) {
+    var y1 = y0 + 22;
+    mapa(BIT, x, y0 - 8, 3); textoPixel(E.bits + '/' + E.bitsTotal, x + 22, y0, '#c9f6fc', 12);
+    textoPixel(String(E.pontos).padStart(6, '0') + ' pts', W - 12, y0, '#eaf1f5', 12, 'right');
+    textoPixel(E.speed ? tempoMs(E.crono) : tempo(E.crono), x0, y1, E.speed ? '#ffd890' : '#eaf1f5', 11);
+    textoPixel('★ ' + E.skills.length + '/' + E.skillsTotal, x0 + 84, y1, '#ffd890', 11);
+    textoPixel('🏆 ' + E.trofeus.length + '/' + E.trofeusTotal, x0 + 154, y1, '#e0a84f', 11);
+    if (E.escudo > 0) textoPixel('⬢', x0 + 220, y1, '#d2b4ff', 12);
+    textoPixel(E.faseAtual > M.ultima ? 'SALA SECRETA' : 'FASE ' + E.faseAtual + '/' + M.ultima, W - 12, y1, E.faseAtual > M.ultima ? '#c9a8ff' : '#6a8294', 11, 'right');
+  } else {
+    mapa(BIT, x, y0 - 8, 3); textoPixel(E.bits + '/' + E.bitsTotal, x + 22, y0, '#c9f6fc', 13);
+    x += 100; textoPixel('★ ' + E.skills.length + '/' + E.skillsTotal, x, y0, '#ffd890', 13);
+    x += 90; textoPixel('🏆 ' + E.trofeus.length + '/' + E.trofeusTotal, x, y0, '#e0a84f', 13);
+    x += 90; textoPixel(E.speed ? tempoMs(E.crono) : tempo(E.crono), x, y0, E.speed ? '#ffd890' : '#eaf1f5', 13);
+    if (E.escudo > 0) textoPixel('⬢ ESCUDO', x + 95, y0, '#d2b4ff', 12);
+    textoPixel(String(E.pontos).padStart(6, '0') + ' pts', W - 16, y0, '#eaf1f5', 13, 'right');
+    textoPixel(nomeFase, W - 16, y0 + 20, E.faseAtual > M.ultima ? '#c9a8ff' : '#6a8294', 11, 'right');
+    if (E.speed) textoPixel('SPEEDRUN', W / 2, y0 - 2, '#ffd890', 12, 'center');
+  }
+  // barra de REIKI: no PC fica embaixo; no toque sobe para não ficar embaixo dos botões
+  var by = compacto ? y0 + 44 : (TOQUE ? y0 + 22 : H - 38);
+  if (!TOQUE && !compacto) textoPixel('P pausa · M som · X rei gun · Shift dash', x0, H - 16, '#6a8294', 10);
   cx.fillStyle = '#10233a'; cx.fillRect(x0, by - 4, 150, 8);
   cx.fillStyle = E.reiki >= 12 ? '#35d0e5' : '#6a8294'; cx.fillRect(x0, by - 4, 150 * E.reiki / 100, 8);
   if (p.mirando) { cx.fillStyle = '#fff'; cx.fillRect(x0, by + 5, 150 * Math.min(p.carga, 1), 3); }
   textoPixel('REIKI', x0 + 158, by, '#6a8294', 10);
   var BB = E.boss;
   if (BB && BB.ativo && BB.vivo && !BB.anuncio && !E.noBonus) {
-    var bw = Math.min(320, W - 40), bx0 = W / 2 - bw / 2, byy = y0 + 22;
+    var bw = Math.min(320, W - 40), bx0 = W / 2 - bw / 2, byy = compacto ? y0 + 70 : y0 + 22;
     cx.fillStyle = '#2a0f1c'; cx.fillRect(bx0, byy, bw, 10);
     cx.fillStyle = BB.fase2 ? '#ff2d55' : '#ff4d7e'; cx.fillRect(bx0, byy, bw * Math.max(0, BB.hp) / BB.hpMax, 10);
     cx.strokeStyle = '#fff'; cx.lineWidth = 1; cx.strokeRect(bx0, byy, bw, 10);
@@ -1167,18 +1181,18 @@ function desenharHUD(){
   for (i = 0; i < E.toasts.length; i++) {
     var ts = E.toasts[i], al = Math.min(1, ts.t * 4, (3.6 - ts.t) * 2);
     cx.globalAlpha = Math.max(0, al);
-    var tw = cx.measureText(tr(ts.txt)).width + 40, ty = y0 + 56 + i * 34;
+    var tw = cx.measureText(tr(ts.txt)).width + 40, ty = y0 + (compacto ? 96 : 56) + i * 34;
     cx.fillStyle = 'rgba(11,24,40,.92)'; cx.fillRect(W / 2 - tw / 2, ty - 14, tw, 28);
     cx.strokeStyle = '#e0a84f'; cx.lineWidth = 2; cx.strokeRect(W / 2 - tw / 2, ty - 14, tw, 28);
     textoPixel('🏅 ' + ts.txt, W / 2, ty + 1, '#ffd890', 11, 'center');
     cx.globalAlpha = 1;
   }
-  if (E.dica && E.dica.ate > E.t) textoPixel(E.dica.txt, W / 2, H - 70, '#eaf1f5', 13, 'center');
+  if (E.dica && E.dica.ate > E.t) textoPixel(E.dica.txt, W / 2, H - (TOQUE ? 120 : 70), '#eaf1f5', compacto ? 11 : 13, 'center');
   if (E.banner) {
     var b = E.banner, al2 = Math.min(1, b.t * 4, (b.dur - b.t) * 3);
     cx.globalAlpha = Math.max(0, al2);
-    textoPixel(b.titulo, W / 2, H * 0.32, b.cor, 34, 'center');
-    textoPixel(b.sub, W / 2, H * 0.32 + 38, '#eaf1f5', 16, 'center');
+    textoPixel(b.titulo, W / 2, H * 0.32, b.cor, compacto ? 24 : 34, 'center');
+    textoPixel(b.sub, W / 2, H * 0.32 + (compacto ? 30 : 38), '#eaf1f5', compacto ? 13 : 16, 'center');
     cx.globalAlpha = 1;
   }
 }
@@ -1417,7 +1431,8 @@ function jogar(tipo){
   limparInput();
   cam = 0; manualAte = 0;
   modo = 'jogando';
-  banner('FASE 0', 'INÍCIO', 2, '#35d0e5');
+  if (TOQUE && window.innerHeight > window.innerWidth) banner('GIRE O CELULAR', 'para jogar melhor', 3.2, '#e0a84f');
+  else banner('FASE 0', 'INÍCIO', 2, '#35d0e5');
   if (E.speed) dizer('SPEEDRUN: derrote o Bug Gigante o mais rápido possível', 4);
   rotulos();
   som.musica.iniciar('normal');
@@ -1650,6 +1665,21 @@ addEventListener('resize', function(){ redimensionarCanvas(); if (modo !== 'menu
   }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
   $$('.rotulo, .cartao, .heroi-texto, .heroi-acoes, .heroi-extras, .controles, .lead, .nota, .codigo, .contatos, .rack').forEach(function(el){ el.classList.add('rev'); obs.observe(el); });
 })();
+
+/* ---------- terminal secreto por toque ---------- */
+if (TOQUE) {
+  var rp = $('.rodape');
+  if (rp) {
+    rp.innerHTML = rp.innerHTML.replace('aperte ` para abrir um terminal secreto', 'toque 3x no meu nome (topo) para abrir um terminal secreto');
+    rp.dataset.en = rp.dataset.en.replace('press ` to open a secret terminal', 'triple-tap my name at the top to open a secret terminal');
+  }
+  var marca = $('.marca'), toques = 0, ultimoToque = 0;
+  if (marca) marca.addEventListener('click', function(e){
+    var agora = Date.now();
+    toques = (agora - ultimoToque < 700) ? toques + 1 : 1; ultimoToque = agora;
+    if (toques >= 3) { toques = 0; e.preventDefault(); abrirTerminal(); }
+  });
+}
 
 /* ---------- início ---------- */
 M.preparar();

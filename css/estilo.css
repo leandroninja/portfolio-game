@@ -186,3 +186,21 @@ kbd{font-family:var(--f-pixel);font-size:11px;background:#10233a;border:1px soli
 .termLinha input{flex:1;background:none;border:0;outline:0;color:#fff;font:inherit;font-size:14px}
 .titulo-fase{display:block;width:max-content;max-width:100%}
 .lead{display:block}
+
+/* ---------- v4: celular (nada disto vale em telas largas) ---------- */
+@media(max-width:720px){
+  .nav{gap:8px;padding:0 12px}
+  .marca{font-size:13px}
+  .mini-btn{font-size:10px;padding:6px 8px}
+  .botao-pixel.mini{font-size:10px;padding:8px 10px 7px;box-shadow:2px 2px 0 var(--ciano-escuro)}
+  .contatos .botao-pixel{font-size:11px;padding:12px 14px 10px;max-width:100%;word-break:break-all}
+  .codigo{max-width:100%;font-size:11px}
+  .heroi-acoes .botao-pixel kbd,.controles{display:none}
+  .heroi-extras .botao-linha{font-size:10px;padding:8px 10px 6px}
+}
+@media(max-width:560px){
+  #pad{bottom:calc(10px + env(safe-area-inset-bottom));padding:0 10px}
+  #pad div{gap:6px}
+  #pad button{width:50px;height:50px;font-size:18px}
+}
+@media(max-width:720px){.fase.heroi{padding-top:calc(var(--nav-h) + 130px)}}
